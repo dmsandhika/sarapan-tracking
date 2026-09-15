@@ -92,6 +92,42 @@ export async function publishDay(items: ExtractedMenuItem[]) {
   revalidatePath("/pesan");
 }
 
+export async function addMenuItems(dayId: string, items: ExtractedMenuItem[]) {
+  const day = await prisma.day.findUniqueOrThrow({
+    where: { id: dayId },
+    include: { menuItems: true },
+  });
+
+  const existingNames = new Set(day.menuItems.map((m) => m.name.trim().toLowerCase()));
+  const newItems = items.filter((item) => !existingNames.has(item.name.trim().toLowerCase()));
+  if (newItems.length === 0) return;
+
+  const startOrder = day.menuItems.length;
+  await prisma.menuItem.createMany({
+    data: newItems.map((item, index) => ({
+      dayId,
+      name: item.name,
+      sortOrder: startOrder + index,
+    })),
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/pesan");
+}
+
+export async function removeMenuItem(menuItemId: string): Promise<{ error?: string }> {
+  const usageCount = await prisma.orderItem.count({
+    where: { OR: [{ menuItemId }, { originalMenuItemId: menuItemId }] },
+  });
+  if (usageCount > 0) {
+    return { error: "Menu ini sudah dipesan orang, tidak bisa dihapus. Tandai 'Habis' saja." };
+  }
+  await prisma.menuItem.delete({ where: { id: menuItemId } });
+  revalidatePath("/admin");
+  revalidatePath("/pesan");
+  return {};
+}
+
 export async function toggleMenuItemStatus(menuItemId: string) {
   const item = await prisma.menuItem.findUniqueOrThrow({ where: { id: menuItemId } });
   await prisma.menuItem.update({

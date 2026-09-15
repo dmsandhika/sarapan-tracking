@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { closeDayOrdering, reopenDayOrdering } from "@/app/actions/admin";
 import MenuList from "./MenuList";
+import AddMenuItemsForm from "./AddMenuItemsForm";
 import OrdersList, { formatRupiah } from "./OrdersList";
 import BillUploadForm from "./BillUploadForm";
 import type { DayWithRelations } from "./types";
@@ -35,6 +36,8 @@ export default function DayDashboard({ day }: { day: DayWithRelations }) {
       </div>
 
       <MenuList menuItems={day.menuItems} />
+
+      <AddMenuItemsForm dayId={day.id} />
 
       <BillUploadForm dayId={day.id} />
 
