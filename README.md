@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sarapan Tracking
 
-## Getting Started
+App kecil untuk kelola pesanan sarapan harian & tracking siapa sudah/belum bayar.
 
-First, run the development server:
+## Alur
+
+1. **Admin** upload screenshot menu (tanpa harga) dari story WA warung → AI baca nama-nama menu → admin review/edit → publish.
+2. Anak-anak buka `/pesan`, centang menu yang mau dipesan, isi nama, submit → dapat **nomor urut** otomatis.
+3. Kalau ada lauk habis, admin tandai "Habis" di dashboard → pesanan yang pakai item itu bisa diganti ke item lain.
+4. Setelah warung kirim foto bill (nomor urut + harga), admin upload foto itu di `/admin` → harga otomatis terisi ke tiap pesanan sesuai nomor urutnya.
+5. Admin tandai siapa yang sudah bayar; rekap total tagihan vs terkumpul otomatis muncul.
+
+## Setup
+
+```bash
+npm install
+npx prisma migrate dev
+```
+
+Isi `.env`:
+
+```
+DATABASE_URL="file:./dev.db"
+ADMIN_PASSWORD="ganti-ke-password-sendiri"
+ANTHROPIC_API_KEY="sk-ant-..."   # wajib diisi biar fitur baca gambar (menu & bill) jalan
+```
+
+`ANTHROPIC_API_KEY` didapat dari [console.anthropic.com](https://console.anthropic.com).
+
+## Menjalankan
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `/pesan` — halaman publik untuk pesan sarapan (share link ini ke grup)
+- `/admin` — dashboard admin (login pakai `ADMIN_PASSWORD`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Catatan
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Database pakai SQLite lokal (`prisma/dev.db`), cocok untuk pemakaian personal/keluarga. Kalau mau diakses banyak orang dari luar jaringan yang sama, deploy ke Vercel + ganti `DATABASE_URL` ke database terkelola (misal Turso/Postgres) karena SQLite file tidak cocok untuk serverless.
+- Tanggal mengikuti timezone Asia/Jakarta.

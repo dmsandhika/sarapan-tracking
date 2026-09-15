@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support in Prisma; these are string unions in TS:
+// DayStatus: "DRAFT" | "PUBLISHED" | "CLOSED"
+// MenuItemStatus: "AVAILABLE" | "HABIS"
+
+model Day {
+  id        String   @id @default(cuid())
+  date      String   @unique // YYYY-MM-DD
+  status    String   @default("DRAFT")
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  menuItems MenuItem[]
+  orders    Order[]
+}
+
+model MenuItem {
+  id        String @id @default(cuid())
+  dayId     String
+  day       Day    @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  name      String
+  status    String @default("AVAILABLE")
+  sortOrder Int    @default(0)
+
+  orderItems         OrderItem[] @relation("CurrentItem")
+  substitutedOrders  OrderItem[] @relation("OriginalItem")
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  dayId      String
+  day        Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  nomorUrut  Int
+  name       String
+  paid       Boolean  @default(false)
+  billAmount Int?
+  createdAt  DateTime @default(now())
+
+  items OrderItem[]
+
+  @@unique([dayId, nomorUrut])
+}
+
+model OrderItem {
+  id                 String    @id @default(cuid())
+  orderId            String
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId         String
+  menuItem           MenuItem  @relation("CurrentItem", fields: [menuItemId], references: [id])
+  originalMenuItemId String?
+  originalMenuItem   MenuItem? @relation("OriginalItem", fields: [originalMenuItemId], references: [id])
+  qty                Int       @default(1)
+  note               String?
+}
