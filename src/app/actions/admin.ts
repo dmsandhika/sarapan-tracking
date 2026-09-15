@@ -10,7 +10,7 @@ import {
   type ExtractedMenuItem,
   type ExtractedBillEntry,
   type ImageInput,
-} from "@/lib/claude";
+} from "@/lib/gemini";
 import { todayJakarta } from "@/lib/date";
 
 export async function loginAdmin(formData: FormData) {
@@ -52,7 +52,8 @@ export async function extractMenuImage(
       return { error: "Tidak ada menu yang terbaca dari gambar. Coba upload ulang atau isi manual." };
     }
     return { items };
-  } catch {
+  } catch (e) {
+    console.error("extractMenuImage failed:", e);
     return { error: "Gagal membaca gambar. Coba lagi." };
   }
 }
@@ -148,7 +149,8 @@ export async function extractBillImage(
       return { error: "Tidak ada baris bill yang terbaca. Coba upload ulang atau isi manual." };
     }
     return { entries };
-  } catch {
+  } catch (e) {
+    console.error("extractBillImage failed:", e);
     return { error: "Gagal membaca foto bill. Coba lagi." };
   }
 }

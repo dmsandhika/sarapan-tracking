@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { extractMenuImage, publishDay } from "@/app/actions/admin";
-import type { ExtractedMenuItem } from "@/lib/claude";
+import type { ExtractedMenuItem } from "@/lib/gemini";
 
 export default function UploadMenuForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);

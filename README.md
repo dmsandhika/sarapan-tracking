@@ -22,10 +22,10 @@ Isi `.env`:
 ```
 DATABASE_URL="file:./dev.db"
 ADMIN_PASSWORD="ganti-ke-password-sendiri"
-ANTHROPIC_API_KEY="sk-ant-..."   # wajib diisi biar fitur baca gambar (menu & bill) jalan
+GEMINI_API_KEY="AIza..."   # wajib diisi biar fitur baca gambar (menu & bill) jalan
 ```
 
-`ANTHROPIC_API_KEY` didapat dari [console.anthropic.com](https://console.anthropic.com).
+`GEMINI_API_KEY` didapat gratis dari [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (tinggal login akun Google, generate key, ada free tier).
 
 ## Menjalankan
 
