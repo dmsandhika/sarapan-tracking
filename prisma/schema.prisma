@@ -3,11 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// SQLite has no native enum support in Prisma; these are string unions in TS:
+// Kept as string unions in TS instead of native Prisma enums:
 // DayStatus: "DRAFT" | "PUBLISHED" | "CLOSED"
 // MenuItemStatus: "AVAILABLE" | "HABIS"
 
