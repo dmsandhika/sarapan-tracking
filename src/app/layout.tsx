@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -11,6 +12,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Jompesan",
   description: "Pesan sarapan & tracking bayar harian",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Jompesan",
+  },
 };
 
 export const viewport: Viewport = {
@@ -25,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${plusJakartaSans.variable} h-full antialiased`}>
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Jompesan — Offline</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #faf6f1;
+    color: #2a211b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 100dvh;
+    padding: 24px;
+    text-align: center;
+  }
+  .logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: #a83a22;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; }
+  p { font-size: 14px; color: #8a7c6d; margin: 0; max-width: 280px; }
+  button {
+    margin-top: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: none;
+    background: #a83a22;
+    color: #fdf5ef;
+    font-size: 15px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+  <div class="logo">
+    <svg viewBox="0 0 32 32" width="36" height="36">
+      <rect width="32" height="32" rx="8" fill="#a83a22" />
+      <rect x="8" y="13" width="14" height="10" rx="3" fill="#faf6f1" />
+      <path d="M22 15.5 a3.2 3.2 0 0 1 0 6.4" fill="none" stroke="#faf6f1" stroke-width="2.4" stroke-linecap="round" />
+      <path d="M12 11 c-1 -1.6 1 -2.4 0 -4" fill="none" stroke="#faf6f1" stroke-width="1.8" stroke-linecap="round" />
+      <path d="M18 11 c-1 -1.6 1 -2.4 0 -4" fill="none" stroke="#faf6f1" stroke-width="1.8" stroke-linecap="round" />
+    </svg>
+  </div>
+  <h1>Kamu lagi offline</h1>
+  <p>Jompesan butuh koneksi internet buat pesan sarapan &amp; lihat data terbaru. Coba lagi kalau sinyal udah balik ya.</p>
+  <button onclick="location.reload()">Coba lagi</button>
+</body>
+</html>
