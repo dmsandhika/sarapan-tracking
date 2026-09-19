@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { todayJakarta, formatDateHuman } from "@/lib/date";
 import OrderForm from "./OrderForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function PesanPage() {
   const date = todayJakarta();
   const day = await prisma.day.findUnique({

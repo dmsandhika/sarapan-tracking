@@ -5,6 +5,9 @@ import { logoutAdmin } from "@/app/actions/admin";
 import UploadMenuForm from "./UploadMenuForm";
 import DayDashboard from "./DayDashboard";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60; // extraction via Gemini can take a few seconds
+
 export default async function AdminPage() {
   const date = todayJakarta();
 
