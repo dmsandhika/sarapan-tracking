@@ -84,3 +84,12 @@ export function DownloadIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function XIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="14" height="14" className={className}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
