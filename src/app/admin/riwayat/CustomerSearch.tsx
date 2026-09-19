@@ -60,7 +60,7 @@ function CustomerCard({ customer }: { customer: CustomerWithOrders }) {
               #{order.nomorUrut} · {formatDateHuman(order.day.date)}
             </Link>
             <div className="flex items-center gap-2">
-              <BillAmountCell orderId={order.id} initial={order.billAmount} />
+              <BillAmountCell key={order.billAmount} orderId={order.id} initial={order.billAmount} />
               <button
                 type="button"
                 disabled={isPending}

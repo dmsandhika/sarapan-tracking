@@ -135,7 +135,7 @@ export default function OrdersList({
             </div>
 
             <div className="flex items-center gap-2">
-              <BillAmountCell order={order} />
+              <BillAmountCell key={order.billAmount} order={order} />
               <button
                 type="button"
                 disabled={isPending}
