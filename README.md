@@ -1,4 +1,4 @@
-# Sarapan Tracking
+# Jompesan
 
 App kecil untuk kelola pesanan sarapan harian & tracking siapa sudah/belum bayar.
 
