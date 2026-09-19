@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { extractMenuImage, publishDay } from "@/app/actions/admin";
 import type { ExtractedMenuItem } from "@/lib/gemini";
+import GeneratingIndicator from "./GeneratingIndicator";
 
 export default function UploadMenuForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +97,7 @@ export default function UploadMenuForm() {
         </div>
       )}
 
-      {isExtracting && <p className="text-sm text-muted">Membaca menu dari gambar...</p>}
+      {isExtracting && <GeneratingIndicator variant="menu" />}
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {items && (

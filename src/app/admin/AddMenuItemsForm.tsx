@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { extractMenuImage, addMenuItems } from "@/app/actions/admin";
 import type { ExtractedMenuItem } from "@/lib/gemini";
+import GeneratingIndicator from "./GeneratingIndicator";
 
 export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +105,7 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
         onChange={handleFileChange}
       />
 
-      {isExtracting && <p className="text-sm text-muted">Membaca menu dari gambar...</p>}
+      {isExtracting && <GeneratingIndicator variant="menu" />}
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {items && (

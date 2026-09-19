@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { extractBillImage, applyBillEntries, type ApplyBillResult } from "@/app/actions/admin";
+import GeneratingIndicator from "./GeneratingIndicator";
 
 export default function BillUploadForm({ dayId }: { dayId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +54,7 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
         onChange={handleFileChange}
       />
 
+      {isPending && <GeneratingIndicator variant="bill" />}
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {result && (
