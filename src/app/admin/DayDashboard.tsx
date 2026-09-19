@@ -23,13 +23,14 @@ export default function DayDashboard({ day }: { day: DayWithRelations }) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="card flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`badge ${isOpen ? "bg-success-soft text-success" : "bg-black/5 text-muted"}`}>
+    <div className="flex flex-col gap-6">
+      <div className="card flex items-center justify-between gap-3">
+        <div>
+          <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${isOpen ? "text-success" : "text-muted"}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-success" : "bg-muted"}`} />
             {isOpen ? "Dibuka" : "Ditutup"}
           </span>
-          <p className="text-sm text-muted">pemesanan hari ini</p>
+          <p className="text-xs text-muted">pemesanan hari ini</p>
         </div>
         <button
           type="button"
@@ -37,7 +38,7 @@ export default function DayDashboard({ day }: { day: DayWithRelations }) {
           onClick={() =>
             startTransition(() => (isOpen ? closeDayOrdering(day.id) : reopenDayOrdering(day.id)))
           }
-          className="btn-secondary min-h-9 px-3 text-sm"
+          className="btn-secondary min-h-9 shrink-0 whitespace-nowrap px-3 text-sm"
         >
           {isOpen ? "Tutup pemesanan" : "Buka lagi"}
         </button>

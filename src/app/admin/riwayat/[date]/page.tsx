@@ -31,17 +31,23 @@ export default async function RiwayatDetailPage({
       </header>
 
       <div className="flex-1 px-5 py-5">
-        <div className="flex flex-col gap-5">
-          <section className="flex flex-col gap-2">
+        <div className="flex flex-col gap-6">
+          <section className="flex flex-col gap-3">
             <h2 className="section-title">Menu hari itu</h2>
-            <div className="card flex flex-col divide-y divide-border p-0">
+            <div className="rounded-card border border-border px-3">
               {day.menuItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between px-4 py-3">
-                  <span className={item.status === "HABIS" ? "text-muted line-through" : "text-[15px]"}>
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between border-b border-border px-1 py-3 last:border-b-0"
+                >
+                  <span className={item.status === "HABIS" ? "text-muted line-through" : "text-sm"}>
                     {item.name}
                   </span>
                   {item.status === "HABIS" && (
-                    <span className="badge bg-black/5 text-muted">Habis</span>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted">
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted" />
+                      Habis
+                    </span>
                   )}
                 </div>
               ))}

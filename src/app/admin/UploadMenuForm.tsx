@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { extractMenuImage, publishDay } from "@/app/actions/admin";
 import type { ExtractedMenuItem } from "@/lib/gemini";
 import GeneratingIndicator from "./GeneratingIndicator";
+import { TrashIcon } from "@/components/icons";
 
 export default function UploadMenuForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,7 +66,7 @@ export default function UploadMenuForm() {
   }
 
   return (
-    <div className="card flex flex-col gap-5">
+    <div className="card flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <p className="text-sm text-muted">
           Upload screenshot menu dari story WA ibu warung (boleh lebih dari 1 gambar). Menu akan
@@ -74,7 +75,7 @@ export default function UploadMenuForm() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-full rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted"
+          className="w-full rounded-card border border-dashed border-border px-4 py-6 text-sm text-muted"
         >
           {previews.length > 0 ? "Ganti gambar" : "Pilih gambar menu"}
         </button>
@@ -92,7 +93,7 @@ export default function UploadMenuForm() {
         <div className="flex flex-wrap gap-2">
           {previews.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="Preview menu" className="h-28 rounded-xl border border-border object-contain" />
+            <img key={i} src={src} alt="Preview menu" className="h-28 rounded-card border border-border object-contain" />
           ))}
         </div>
       )}
@@ -111,8 +112,13 @@ export default function UploadMenuForm() {
                 placeholder="Nama menu"
                 className="field-input flex-1 text-sm"
               />
-              <button type="button" onClick={() => removeItem(index)} className="text-sm text-danger">
-                Hapus
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                aria-label="Hapus item"
+                className="flex h-11 w-11 shrink-0 items-center justify-center text-danger"
+              >
+                <TrashIcon />
               </button>
             </div>
           ))}

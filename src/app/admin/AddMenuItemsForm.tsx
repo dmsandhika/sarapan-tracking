@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { extractMenuImage, addMenuItems } from "@/app/actions/admin";
 import type { ExtractedMenuItem } from "@/lib/gemini";
 import GeneratingIndicator from "./GeneratingIndicator";
+import { TrashIcon } from "@/components/icons";
 
 export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,7 +84,7 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
             setIsOpen(false);
             reset();
           }}
-          className="text-xs text-muted"
+          className="text-sm text-muted"
         >
           Tutup
         </button>
@@ -92,7 +93,7 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="w-full rounded-xl border border-dashed border-border px-4 py-4 text-sm text-muted"
+        className="w-full rounded-card border border-dashed border-border px-4 py-4 text-sm text-muted"
       >
         Pilih gambar menu susulan
       </button>
@@ -118,8 +119,13 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
                 placeholder="Nama menu"
                 className="field-input flex-1 text-sm"
               />
-              <button type="button" onClick={() => removeDraftItem(index)} className="text-sm text-danger">
-                Hapus
+              <button
+                type="button"
+                onClick={() => removeDraftItem(index)}
+                aria-label="Hapus item"
+                className="flex h-11 w-11 shrink-0 items-center justify-center text-danger"
+              >
+                <TrashIcon />
               </button>
             </div>
           ))}

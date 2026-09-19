@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { getOrderListWhatsAppUrl } from "@/app/actions/whatsapp";
+import { SendIcon } from "@/components/icons";
 
 export default function SendToWhatsAppButton({ dayId }: { dayId: string }) {
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +21,16 @@ export default function SendToWhatsAppButton({ dayId }: { dayId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <button type="button" onClick={handleClick} disabled={isPending} className="btn-secondary w-full">
-        {isPending ? "Menyiapkan..." : "📋 Kirim daftar pesanan ke WA"}
+        {isPending ? (
+          "Menyiapkan..."
+        ) : (
+          <>
+            <SendIcon className="text-muted" />
+            Kirim daftar pesanan ke WA
+          </>
+        )}
       </button>
       {error && <p className="text-sm text-danger">{error}</p>}
     </div>

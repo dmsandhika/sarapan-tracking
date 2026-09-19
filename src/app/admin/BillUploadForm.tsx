@@ -32,16 +32,16 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
   }
 
   return (
-    <section className="card flex flex-col gap-2">
+    <section className="card flex flex-col gap-3">
       <h2 className="section-title">Upload foto bill</h2>
-      <p className="text-xs text-muted">
+      <p className="text-sm text-muted">
         Foto bill dari warung (nomor urut + harga) akan otomatis dicocokkan ke pesanan.
       </p>
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
-        className="self-start rounded-xl border border-dashed border-border px-4 py-2 text-sm text-muted"
+        className="flex min-h-11 items-center self-start rounded-card border border-dashed border-border px-4 text-sm text-muted"
       >
         {isPending ? "Memproses..." : "Pilih foto bill"}
       </button>
@@ -58,7 +58,7 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {result && (
-        <div className="flex flex-col gap-1 text-sm">
+        <div className="flex flex-col gap-2 text-sm">
           <p className="text-success">{result.updated} pesanan berhasil diisi harga.</p>
           {result.unmatched.length > 0 && (
             <p className="text-warning">

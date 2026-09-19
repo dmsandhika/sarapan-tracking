@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toggleMenuItemStatus, removeMenuItem, renameMenuItem } from "@/app/actions/admin";
+import { PencilIcon, TrashIcon } from "@/components/icons";
 import type { MenuItemRow } from "./types";
 
 export default function MenuList({
@@ -63,10 +64,10 @@ export default function MenuList({
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-3">
       <h2 className="section-title">Menu hari ini</h2>
       {error && <p className="text-sm text-danger">{error}</p>}
-      <div className="card flex flex-col divide-y divide-border p-0">
+      <div className="rounded-card border border-border px-3">
         {menuItems.map((item) => {
           const isHabis = item.status === "HABIS";
           const affected = affectedCounts[item.id] ?? 0;
@@ -75,36 +76,37 @@ export default function MenuList({
           );
 
           return (
-            <div key={item.id} className="flex flex-col gap-2 px-4 py-3">
+            <div
+              key={item.id}
+              className="flex flex-col gap-2 border-b border-border px-1 py-3 last:border-b-0"
+            >
               <div className="flex items-center justify-between gap-2">
                 {renamingId === item.id ? (
                   <input
                     autoFocus
                     value={renameValue}
                     onChange={(e) => setRenameValue(e.target.value)}
-                    className="field-input min-h-9 flex-1 text-sm"
+                    className="field-input min-h-9 flex-1 rounded-control text-sm"
                   />
                 ) : (
-                  <span className={isHabis ? "text-muted line-through" : "text-[15px]"}>
-                    {item.name}
-                  </span>
+                  <span className={isHabis ? "text-muted line-through" : "text-sm"}>{item.name}</span>
                 )}
 
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex shrink-0 items-center gap-3">
                   {renamingId === item.id ? (
                     <>
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={saveRename}
-                        className="text-xs font-medium text-primary"
+                        className="text-sm font-medium text-primary"
                       >
                         Simpan
                       </button>
                       <button
                         type="button"
                         onClick={() => setRenamingId(null)}
-                        className="text-xs text-muted"
+                        className="text-sm text-muted"
                       >
                         Batal
                       </button>
@@ -115,25 +117,32 @@ export default function MenuList({
                         type="button"
                         disabled={isPending}
                         onClick={() => markHabis(item)}
-                        className={`badge ${isHabis ? "bg-black/5 text-muted" : "bg-danger-soft text-danger"}`}
+                        className={`inline-flex items-center gap-1.5 text-sm font-medium ${
+                          isHabis ? "text-muted" : "text-danger"
+                        }`}
                       >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${isHabis ? "bg-muted" : "bg-danger"}`}
+                        />
                         {isHabis ? "Tandai tersedia" : "Tandai habis"}
                       </button>
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={() => startRename(item)}
-                        className="text-xs text-muted"
+                        aria-label="Edit nama menu"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center text-muted"
                       >
-                        Edit
+                        <PencilIcon />
                       </button>
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={() => handleRemove(item.id)}
-                        className="text-xs text-muted"
+                        aria-label="Hapus menu"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center text-muted"
                       >
-                        Hapus
+                        <TrashIcon />
                       </button>
                     </>
                   )}
@@ -141,14 +150,14 @@ export default function MenuList({
               </div>
 
               {substitutingId === item.id && (
-                <div className="flex flex-col gap-2 rounded-xl bg-warning-soft p-3">
+                <div className="flex flex-col gap-2 rounded-card border border-warning/30 p-3">
                   <p className="text-xs text-warning">
                     {affected} pesanan pakai menu ini. Ganti semua ke menu lain sekaligus?
                   </p>
                   <select
                     value={replacementChoice}
                     onChange={(e) => setReplacementChoice(e.target.value)}
-                    className="field-input min-h-9 text-sm"
+                    className="field-input min-h-9 rounded-control text-sm"
                   >
                     <option value="">Pilih menu pengganti...</option>
                     {otherAvailableItems.map((m) => (
@@ -157,7 +166,7 @@ export default function MenuList({
                       </option>
                     ))}
                   </select>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <button
                       type="button"
                       disabled={isPending || !replacementChoice}
@@ -170,14 +179,14 @@ export default function MenuList({
                       type="button"
                       disabled={isPending}
                       onClick={() => confirmSubstitute(item.id)}
-                      className="text-xs text-muted underline"
+                      className="text-sm text-muted underline"
                     >
                       Tandai habis tanpa ganti
                     </button>
                     <button
                       type="button"
                       onClick={() => setSubstitutingId(null)}
-                      className="text-xs text-muted"
+                      className="text-sm text-muted"
                     >
                       Batal
                     </button>

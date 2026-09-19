@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { submitOrder } from "@/app/actions/orders";
+import { ChevronRightIcon } from "@/components/icons";
 
 type MenuItem = { id: string; name: string; status: string };
 type Selection = { checked: boolean; qty: number; note: string };
@@ -105,10 +106,14 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
           ✅
         </span>
         <p className="text-sm text-muted">Pesanan terkirim!</p>
-        <p className="text-4xl font-bold text-success">#{nomorUrut}</p>
+        <p className="text-4xl font-bold tabular-nums text-success">#{nomorUrut}</p>
         <p className="text-sm text-muted">Nomor urut kamu, {name}</p>
-        <Link href="/status" className="mt-2 text-sm text-primary underline underline-offset-4">
-          Lihat status pesanan →
+        <Link
+          href="/status"
+          className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline underline-offset-4"
+        >
+          Lihat status pesanan
+          <ChevronRightIcon />
         </Link>
       </div>
     );
@@ -152,32 +157,32 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
                   className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
                 >
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-control border text-xs ${
                       isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
                     }`}
                   >
                     {isChecked ? "✓" : ""}
                   </span>
-                  <span className="text-[15px]">
+                  <span className="text-sm">
                     {item.name}
                     {isHabis && <span className="ml-2 text-xs text-danger">(habis)</span>}
                   </span>
                 </button>
 
                 {isChecked && !isHabis && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setQty(item.id, selection.qty - 1)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                      className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
                     >
                       −
                     </button>
-                    <span className="w-6 text-center text-sm font-medium">{selection.qty}</span>
+                    <span className="w-6 text-center text-sm font-medium tabular-nums">{selection.qty}</span>
                     <button
                       type="button"
                       onClick={() => setQty(item.id, selection.qty + 1)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                      className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
                     >
                       +
                     </button>
@@ -190,7 +195,7 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
                   value={selection.note}
                   onChange={(e) => setNote(item.id, e.target.value)}
                   placeholder="Catatan (opsional), misal: pedas dikit"
-                  className="field-input min-h-9 pl-8 text-sm"
+                  className="field-input min-h-9 rounded-control pl-8 text-sm"
                 />
               )}
             </div>
@@ -200,7 +205,7 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
 
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t border-border bg-background/95 px-5 pt-3 backdrop-blur [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t border-border bg-background/95 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
         <button type="submit" disabled={isPending} className="btn-primary w-full">
           {isPending ? "Mengirim..." : totalItems > 0 ? `Kirim Pesanan (${totalItems} item)` : "Kirim Pesanan"}
         </button>

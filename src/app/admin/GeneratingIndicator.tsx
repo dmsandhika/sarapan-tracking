@@ -33,7 +33,7 @@ export default function GeneratingIndicator({ variant }: { variant: keyof typeof
   }, [messages.length]);
 
   return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-primary-soft px-3.5 py-2.5 text-sm text-primary">
+    <div className="flex items-center gap-2 rounded-card bg-primary-soft px-3.5 py-2.5 text-sm text-primary">
       <span className="flex shrink-0 items-center gap-1">
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />

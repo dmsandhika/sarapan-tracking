@@ -17,12 +17,17 @@ function OrderCard({ order }: { order: CustomerOrderHistory["orders"][number] })
           </span>
           <span className="text-sm text-muted">{formatDateHuman(order.date)}</span>
         </div>
-        <span className={`badge ${order.paid ? "bg-success-soft text-success" : "bg-black/5 text-muted"}`}>
+        <span
+          className={`inline-flex items-center gap-1.5 text-sm font-medium ${
+            order.paid ? "text-success" : "text-muted"
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${order.paid ? "bg-success" : "bg-muted"}`} />
           {order.paid ? "Lunas" : "Belum bayar"}
         </span>
       </div>
 
-      <div className="flex flex-col gap-1 border-t border-border pt-2 text-sm">
+      <div className="flex flex-col gap-2 border-t border-border pt-2 text-sm">
         {order.items.map((item) => (
           <div key={item.id} className="flex flex-wrap items-center gap-2">
             <span>
@@ -39,7 +44,7 @@ function OrderCard({ order }: { order: CustomerOrderHistory["orders"][number] })
       {order.billAmount != null && (
         <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-medium">
           <span>Tagihan</span>
-          <span>{formatRupiah(order.billAmount)}</span>
+          <span className="tabular-nums">{formatRupiah(order.billAmount)}</span>
         </div>
       )}
     </div>
@@ -89,7 +94,7 @@ export default function StatusLookup() {
   const historyOrders = result?.orders.filter((o) => o.date !== today) ?? [];
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -113,12 +118,12 @@ export default function StatusLookup() {
 
       {result && (
         <>
-          <section className="flex flex-col gap-2">
+          <section className="flex flex-col gap-3">
             <h2 className="section-title">Hari ini</h2>
             {todayOrders.length === 0 ? (
               <p className="card text-sm text-muted">Belum ada pesanan hari ini.</p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {todayOrders.map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}
@@ -127,9 +132,9 @@ export default function StatusLookup() {
           </section>
 
           {historyOrders.length > 0 && (
-            <section className="flex flex-col gap-2">
+            <section className="flex flex-col gap-3">
               <h2 className="section-title">Riwayat</h2>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {historyOrders.map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}

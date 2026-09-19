@@ -2,19 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount, deleteOrder } from "@/app/actions/admin";
+import { TrashIcon } from "@/components/icons";
 import type { MenuItemRow, OrderWithItems } from "./types";
-
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  );
-}
 
 function OrderItemRow({
   item,
@@ -46,7 +35,7 @@ function OrderItemRow({
             if (!newId) return;
             startTransition(() => substituteOrderItem(item.id, newId));
           }}
-          className="rounded-lg border border-warning/30 bg-warning-soft px-2 py-1 text-xs text-warning"
+          className="rounded-control border border-warning/30 bg-card px-2 py-1 text-xs text-warning"
         >
           <option value="" disabled>
             Habis, ganti ke...
@@ -80,8 +69,24 @@ function BillAmountCell({ order }: { order: OrderWithItems }) {
       onChange={(e) => setValue(e.target.value)}
       onBlur={save}
       placeholder="Rp"
-      className="field-input min-h-9 w-28 text-right text-sm"
+      className="field-input min-h-9 w-28 rounded-control text-right text-sm tabular-nums"
     />
+  );
+}
+
+function PaidToggle({ order, disabled, onToggle }: { order: OrderWithItems; disabled: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onToggle}
+      className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium ${
+        order.paid ? "text-success" : "text-muted"
+      }`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${order.paid ? "bg-success" : "bg-muted"}`} />
+      {order.paid ? "Lunas" : "Belum bayar"}
+    </button>
   );
 }
 
@@ -105,7 +110,7 @@ export default function OrdersList({
 
   if (orders.length === 0) {
     return (
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-3">
         <h2 className="section-title">Pesanan</h2>
         <p className="card text-sm text-muted">Belum ada pesanan masuk.</p>
       </section>
@@ -113,13 +118,13 @@ export default function OrdersList({
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-3">
       <h2 className="section-title">Pesanan ({orders.length})</h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         {orders.map((order) => (
           <div key={order.id} className="card flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold tabular-nums text-primary">
                 {order.nomorUrut}
               </span>
               <span className="min-w-0 flex-1 truncate font-medium">{order.name}</span>
@@ -128,27 +133,24 @@ export default function OrdersList({
                 disabled={isPending}
                 onClick={() => setConfirmingId(order.id)}
                 aria-label="Hapus pesanan"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted active:bg-danger-soft active:text-danger"
+                className="flex h-11 w-11 shrink-0 items-center justify-center text-muted active:text-danger"
               >
                 <TrashIcon />
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <BillAmountCell key={order.billAmount} order={order} />
-              <button
-                type="button"
+              <PaidToggle
+                order={order}
                 disabled={isPending}
-                onClick={() => startTransition(() => toggleOrderPaid(order.id))}
-                className={`badge ${order.paid ? "bg-success-soft text-success" : "bg-black/5 text-muted"}`}
-              >
-                {order.paid ? "Lunas" : "Belum bayar"}
-              </button>
+                onToggle={() => startTransition(() => toggleOrderPaid(order.id))}
+              />
             </div>
 
             {confirmingId === order.id && (
-              <div className="flex flex-col gap-2 rounded-xl bg-danger-soft p-3">
-                <p className="text-xs text-danger">
+              <div className="flex flex-col gap-2 rounded-card border border-danger/30 p-3">
+                <p className="text-sm text-danger">
                   Yakin hapus pesanan #{order.nomorUrut} {order.name}? Tidak bisa dibatalkan.
                 </p>
                 <div className="flex items-center gap-4">
@@ -156,14 +158,14 @@ export default function OrdersList({
                     type="button"
                     disabled={isPending}
                     onClick={() => confirmDelete(order.id)}
-                    className="text-xs font-semibold text-danger underline underline-offset-2"
+                    className="text-sm font-semibold text-danger underline underline-offset-2"
                   >
                     Ya, hapus
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmingId(null)}
-                    className="text-xs text-muted"
+                    className="text-sm text-muted"
                   >
                     Batal
                   </button>
@@ -171,7 +173,7 @@ export default function OrdersList({
               </div>
             )}
 
-            <div className="flex flex-col gap-1 border-t border-border pt-2 pl-1">
+            <div className="flex flex-col gap-2 border-t border-border pt-2 pl-1">
               {order.items.map((item) => (
                 <OrderItemRow
                   key={item.id}

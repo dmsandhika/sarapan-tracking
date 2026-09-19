@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPastDays } from "@/app/actions/history";
 import { formatDateHuman } from "@/lib/date";
 import { formatRupiah } from "@/lib/currency";
+import { ChevronRightIcon } from "@/components/icons";
 import CustomerSearch from "./CustomerSearch";
 
 export const dynamic = "force-dynamic";
@@ -25,33 +26,36 @@ export default async function RiwayatPage() {
         <div className="flex flex-col gap-6">
           <CustomerSearch />
 
-          <section className="flex flex-col gap-2">
+          <section className="flex flex-col gap-3">
             <h2 className="section-title">Semua hari</h2>
             {pastDays.length === 0 ? (
               <p className="card text-sm text-muted">Belum ada riwayat hari sebelumnya.</p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {pastDays.map((day) => {
                   const belumTerkumpul = day.totalBilled - day.totalCollected;
                   return (
                     <Link
                       key={day.date}
                       href={`/admin/riwayat/${day.date}`}
-                      className="card flex items-center justify-between gap-2"
+                      className="card flex items-center justify-between gap-3"
                     >
                       <div>
                         <p className="text-sm font-medium">{formatDateHuman(day.date)}</p>
                         <p className="text-xs text-muted">{day.orderCount} pesanan</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{formatRupiah(day.totalBilled)}</p>
-                        {belumTerkumpul > 0 ? (
-                          <p className="text-xs text-danger">
-                            Belum terkumpul {formatRupiah(belumTerkumpul)}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-success">Lunas semua</p>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className="text-sm font-medium tabular-nums">{formatRupiah(day.totalBilled)}</p>
+                          {belumTerkumpul > 0 ? (
+                            <p className="text-xs tabular-nums text-danger">
+                              Belum terkumpul {formatRupiah(belumTerkumpul)}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-success">Lunas semua</p>
+                          )}
+                        </div>
+                        <ChevronRightIcon className="shrink-0 text-muted" />
                       </div>
                     </Link>
                   );

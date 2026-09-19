@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-10">
       <div className="flex flex-col items-center gap-3 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-card bg-primary-soft text-2xl">
           🔐
         </span>
         <h1 className="text-lg font-semibold">Login Admin</h1>
