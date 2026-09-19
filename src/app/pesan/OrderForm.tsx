@@ -51,6 +51,13 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
     }));
   }
 
+  function setNote(menuItemId: string, note: string) {
+    setSelections((prev) => ({
+      ...prev,
+      [menuItemId]: { ...(prev[menuItemId] ?? { checked: true, qty: 1 }), checked: true, note },
+    }));
+  }
+
   const totalItems = Object.values(selections)
     .filter((s) => s.checked)
     .reduce((sum, s) => sum + s.qty, 0);
@@ -133,47 +140,58 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
           return (
             <div
               key={item.id}
-              className={`card flex items-center justify-between gap-3 ${
+              className={`card flex flex-col gap-2 ${
                 isHabis ? "opacity-50" : isChecked ? "border-primary/40 ring-1 ring-primary/20" : ""
               }`}
             >
-              <button
-                type="button"
-                disabled={isHabis}
-                onClick={() => toggle(item.id)}
-                className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
-              >
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs ${
-                    isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
-                  }`}
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  disabled={isHabis}
+                  onClick={() => toggle(item.id)}
+                  className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
                 >
-                  {isChecked ? "✓" : ""}
-                </span>
-                <span className="text-[15px]">
-                  {item.name}
-                  {isHabis && <span className="ml-2 text-xs text-danger">(habis)</span>}
-                </span>
-              </button>
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs ${
+                      isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                    }`}
+                  >
+                    {isChecked ? "✓" : ""}
+                  </span>
+                  <span className="text-[15px]">
+                    {item.name}
+                    {isHabis && <span className="ml-2 text-xs text-danger">(habis)</span>}
+                  </span>
+                </button>
+
+                {isChecked && !isHabis && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setQty(item.id, selection.qty - 1)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                    >
+                      −
+                    </button>
+                    <span className="w-6 text-center text-sm font-medium">{selection.qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty(item.id, selection.qty + 1)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {isChecked && !isHabis && (
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setQty(item.id, selection.qty - 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
-                  >
-                    −
-                  </button>
-                  <span className="w-6 text-center text-sm font-medium">{selection.qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQty(item.id, selection.qty + 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
-                  >
-                    +
-                  </button>
-                </div>
+                <input
+                  value={selection.note}
+                  onChange={(e) => setNote(item.id, e.target.value)}
+                  placeholder="Catatan (opsional), misal: pedas dikit"
+                  className="field-input min-h-9 pl-8 text-sm"
+                />
               )}
             </div>
           );
