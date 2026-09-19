@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount, deleteOrder } from "@/app/actions/admin";
 import { TrashIcon } from "@/components/icons";
 import type { MenuItemRow, OrderWithItems } from "./types";
@@ -148,30 +149,40 @@ export default function OrdersList({
               />
             </div>
 
-            {confirmingId === order.id && (
-              <div className="flex flex-col gap-2 rounded-card border border-danger/30 p-3">
-                <p className="text-sm text-danger">
-                  Yakin hapus pesanan #{order.nomorUrut} {order.name}? Tidak bisa dibatalkan.
-                </p>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => confirmDelete(order.id)}
-                    className="text-sm font-semibold text-danger underline underline-offset-2"
-                  >
-                    Ya, hapus
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmingId(null)}
-                    className="text-sm text-muted"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {confirmingId === order.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-col gap-2 rounded-card border border-danger/30 p-3">
+                    <p className="text-sm text-danger">
+                      Yakin hapus pesanan #{order.nomorUrut} {order.name}? Tidak bisa dibatalkan.
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => confirmDelete(order.id)}
+                        className="text-sm font-semibold text-danger underline underline-offset-2"
+                      >
+                        Ya, hapus
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingId(null)}
+                        className="text-sm text-muted"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="flex flex-col gap-2 border-t border-border pt-2 pl-1">
               {order.items.map((item) => (

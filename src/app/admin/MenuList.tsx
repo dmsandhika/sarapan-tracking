@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toggleMenuItemStatus, removeMenuItem, renameMenuItem } from "@/app/actions/admin";
 import { PencilIcon, TrashIcon } from "@/components/icons";
 import type { MenuItemRow } from "./types";
@@ -149,50 +150,60 @@ export default function MenuList({
                 </div>
               </div>
 
-              {substitutingId === item.id && (
-                <div className="flex flex-col gap-2 rounded-card border border-warning/30 p-3">
-                  <p className="text-xs text-warning">
-                    {affected} pesanan pakai menu ini. Ganti semua ke menu lain sekaligus?
-                  </p>
-                  <select
-                    value={replacementChoice}
-                    onChange={(e) => setReplacementChoice(e.target.value)}
-                    className="field-input min-h-9 rounded-control text-sm"
+              <AnimatePresence>
+                {substitutingId === item.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
                   >
-                    <option value="">Pilih menu pengganti...</option>
-                    {otherAvailableItems.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      disabled={isPending || !replacementChoice}
-                      onClick={() => confirmSubstitute(item.id, replacementChoice)}
-                      className="btn-primary min-h-9 px-3 text-sm"
-                    >
-                      Ganti semua &amp; tandai habis
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => confirmSubstitute(item.id)}
-                      className="text-sm text-muted underline"
-                    >
-                      Tandai habis tanpa ganti
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSubstitutingId(null)}
-                      className="text-sm text-muted"
-                    >
-                      Batal
-                    </button>
-                  </div>
-                </div>
-              )}
+                    <div className="flex flex-col gap-3 rounded-card border border-warning/30 p-3">
+                      <p className="text-sm text-warning">
+                        {affected} pesanan pakai menu ini. Ganti semua ke menu lain sekaligus?
+                      </p>
+                      <select
+                        value={replacementChoice}
+                        onChange={(e) => setReplacementChoice(e.target.value)}
+                        className="field-input min-h-9 rounded-control text-sm"
+                      >
+                        <option value="">Pilih menu pengganti...</option>
+                        {otherAvailableItems.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={isPending || !replacementChoice}
+                        onClick={() => confirmSubstitute(item.id, replacementChoice)}
+                        className="btn-primary w-full"
+                      >
+                        Ganti semua &amp; tandai habis
+                      </button>
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => confirmSubstitute(item.id)}
+                          className="text-sm text-muted underline"
+                        >
+                          Tandai habis tanpa ganti
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSubstitutingId(null)}
+                          className="text-sm text-muted"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}

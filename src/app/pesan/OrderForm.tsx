@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import { submitOrder } from "@/app/actions/orders";
 import { ChevronRightIcon } from "@/components/icons";
 
@@ -10,13 +11,42 @@ type Selection = { checked: boolean; qty: number; note: string };
 
 const PROFILE_KEY = "sarapan-tracking:profile";
 
+const SUCCESS_MESSAGES = [
+  "Pesanan meluncur ke dapur warung!",
+  "Sip, perut kamu udah masuk antrian!",
+  "Aman, warung udah dapet sinyal laper kamu!",
+  "Gaskeun, tinggal nunggu asap ngebul dari kuali!",
+  "Beres! Tinggal duduk manis nunggu dipanggil.",
+  "Sukses! Rejeki nomor urut ini nggak akan ketuker.",
+  "Mantap, pesanan kamu resmi jadi prioritas dapur!",
+  "Yes! Nomor antrian kamu udah dicetak di alam semesta.",
+  "Oke, warung udah pasang alarm khusus buat pesanan ini!",
+  "Berhasil! Tinggal latihan sabar sambil ngebayangin rasanya.",
+];
+
+function randomSuccessMessage() {
+  return SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
+}
+
 export default function OrderForm({ dayId, menuItems }: { dayId: string; menuItems: MenuItem[] }) {
   const [name, setName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [selections, setSelections] = useState<Record<string, Selection>>({});
   const [error, setError] = useState<string | null>(null);
   const [nomorUrut, setNomorUrut] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+  const successSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  function playSuccessSound() {
+    if (!successSoundRef.current) {
+      successSoundRef.current = new Audio("/dono_UZmG3Ta.mp3");
+    }
+    successSoundRef.current.currentTime = 0;
+    successSoundRef.current.play().catch(() => {
+      // ignore browsers blocking autoplay
+    });
+  }
 
   useEffect(() => {
     try {
@@ -94,6 +124,8 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
         } catch {
           // ignore unavailable storage
         }
+        playSuccessSound();
+        setSuccessMessage(randomSuccessMessage());
         setNomorUrut(result.nomorUrut);
       }
     });
@@ -101,13 +133,44 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
 
   if (nomorUrut !== null) {
     return (
-      <div className="card flex flex-col items-center gap-2 py-10 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-2xl">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="card flex flex-col items-center gap-2 py-10 text-center"
+      >
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-2xl"
+        >
           ✅
-        </span>
-        <p className="text-sm text-muted">Pesanan terkirim!</p>
-        <p className="text-4xl font-bold tabular-nums text-success">#{nomorUrut}</p>
-        <p className="text-sm text-muted">Nomor urut kamu, {name}</p>
+        </motion.span>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-sm text-muted"
+        >
+          {successMessage}
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.25 }}
+          className="text-4xl font-bold tabular-nums text-success"
+        >
+          #{nomorUrut}
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="text-sm text-muted"
+        >
+          Nomor urut kamu, {name}
+        </motion.p>
         <Link
           href="/status"
           className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline underline-offset-4"
@@ -115,7 +178,7 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
           Lihat status pesanan
           <ChevronRightIcon />
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
@@ -145,7 +208,7 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
           return (
             <div
               key={item.id}
-              className={`card flex flex-col gap-2 ${
+              className={`card flex flex-col gap-2 transition-colors duration-200 ${
                 isHabis ? "opacity-50" : isChecked ? "border-primary/40 ring-1 ring-primary/20" : ""
               }`}
             >
@@ -157,11 +220,30 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
                   className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
                 >
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-control border text-xs ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-control border transition-colors duration-200 ${
                       isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
                     }`}
                   >
-                    {isChecked ? "✓" : ""}
+                    <AnimatePresence>
+                      {isChecked && (
+                        <motion.svg
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                          viewBox="0 0 24 24"
+                          width="12"
+                          height="12"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M20 6 9 17l-5-5" />
+                        </motion.svg>
+                      )}
+                    </AnimatePresence>
                   </span>
                   <span className="text-sm">
                     {item.name}
@@ -169,35 +251,66 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
                   </span>
                 </button>
 
-                {isChecked && !isHabis && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setQty(item.id, selection.qty - 1)}
-                      className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
+                <AnimatePresence>
+                  {isChecked && !isHabis && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-2"
                     >
-                      −
-                    </button>
-                    <span className="w-6 text-center text-sm font-medium tabular-nums">{selection.qty}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQty(item.id, selection.qty + 1)}
-                      className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
-                    >
-                      +
-                    </button>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        onClick={() => setQty(item.id, selection.qty - 1)}
+                        className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
+                      >
+                        −
+                      </button>
+                      <span className="relative w-6 overflow-hidden text-center text-sm font-medium tabular-nums">
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          <motion.span
+                            key={selection.qty}
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -10, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="block"
+                          >
+                            {selection.qty}
+                          </motion.span>
+                        </AnimatePresence>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQty(item.id, selection.qty + 1)}
+                        className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
+                      >
+                        +
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {isChecked && !isHabis && (
-                <input
-                  value={selection.note}
-                  onChange={(e) => setNote(item.id, e.target.value)}
-                  placeholder="Catatan (opsional), misal: pedas dikit"
-                  className="field-input min-h-9 rounded-control pl-8 text-sm"
-                />
-              )}
+              <AnimatePresence>
+                {isChecked && !isHabis && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <input
+                      value={selection.note}
+                      onChange={(e) => setNote(item.id, e.target.value)}
+                      placeholder="Catatan (opsional), misal: pedas dikit"
+                      className="field-input min-h-9 w-full rounded-control pl-8 text-sm"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
