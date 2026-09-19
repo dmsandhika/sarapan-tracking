@@ -64,16 +64,16 @@ export default function UploadMenuForm() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-sm text-black/70">
+    <div className="card flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted">
           Upload screenshot menu dari story WA ibu warung (boleh lebih dari 1 gambar). Menu akan
           dibaca otomatis, tanpa harga.
         </p>
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-full rounded-lg border border-dashed border-black/30 px-4 py-6 text-sm text-black/60"
+          className="w-full rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted"
         >
           {previews.length > 0 ? "Ganti gambar" : "Pilih gambar menu"}
         </button>
@@ -91,40 +91,35 @@ export default function UploadMenuForm() {
         <div className="flex flex-wrap gap-2">
           {previews.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="Preview menu" className="h-32 rounded-lg object-contain" />
+            <img key={i} src={src} alt="Preview menu" className="h-28 rounded-xl border border-border object-contain" />
           ))}
         </div>
       )}
 
-      {isExtracting && <p className="text-sm text-black/60">Membaca menu dari gambar...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {isExtracting && <p className="text-sm text-muted">Membaca menu dari gambar...</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {items && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium">Cek & edit menu sebelum publish</h2>
+          <h2 className="section-title">Cek &amp; edit menu sebelum publish</h2>
           {items.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <input
                 value={item.name}
                 onChange={(e) => updateItemName(index, e.target.value)}
                 placeholder="Nama menu"
-                className="flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm"
+                className="field-input flex-1 text-sm"
               />
-              <button type="button" onClick={() => removeItem(index)} className="text-sm text-red-600">
+              <button type="button" onClick={() => removeItem(index)} className="text-sm text-danger">
                 Hapus
               </button>
             </div>
           ))}
-          <button type="button" onClick={addItem} className="self-start text-sm underline">
+          <button type="button" onClick={addItem} className="btn-ghost self-start px-0 text-sm">
             + Tambah item manual
           </button>
 
-          <button
-            type="button"
-            onClick={handlePublish}
-            disabled={isPublishing}
-            className="mt-2 rounded-lg bg-black px-4 py-2 text-white disabled:opacity-50"
-          >
+          <button type="button" onClick={handlePublish} disabled={isPublishing} className="btn-primary mt-2 w-full">
             {isPublishing ? "Publishing..." : "Publish menu hari ini"}
           </button>
         </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { todayJakarta, formatDateHuman } from "@/lib/date";
 import { logoutAdmin } from "@/app/actions/admin";
@@ -23,22 +24,29 @@ export default async function AdminPage() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 pt-6 pb-4 backdrop-blur">
         <div>
-          <h1 className="text-xl font-semibold">Admin Sarapan</h1>
-          <p className="text-sm text-black/60">{formatDateHuman(date)}</p>
+          <h1 className="text-lg font-semibold">Admin Sarapan</h1>
+          <p className="text-sm text-muted">{formatDateHuman(date)}</p>
         </div>
-        <form action={logoutAdmin}>
-          <button className="text-sm text-black/50 underline">Keluar</button>
-        </form>
-      </div>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/riwayat" className="btn-ghost">
+            Riwayat
+          </Link>
+          <form action={logoutAdmin}>
+            <button className="btn-ghost">Keluar</button>
+          </form>
+        </div>
+      </header>
 
-      {!day || day.menuItems.length === 0 ? (
-        <UploadMenuForm />
-      ) : (
-        <DayDashboard day={day} />
-      )}
+      <div className="flex-1 px-5 py-5">
+        {!day || day.menuItems.length === 0 ? (
+          <UploadMenuForm />
+        ) : (
+          <DayDashboard day={day} />
+        )}
+      </div>
     </main>
   );
 }

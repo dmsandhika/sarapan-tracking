@@ -1,20 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf7f2;
+  --foreground: #292019;
+  --card: #ffffff;
+  --border: #ece4d8;
+  --muted: #8a7c6d;
+  --primary: #d9711b;
+  --primary-foreground: #fffaf5;
+  --primary-soft: #fdead9;
+  --success: #1a7f4e;
+  --success-soft: #e5f6ec;
+  --danger: #c8402c;
+  --danger-soft: #fbe9e6;
+  --warning: #b6790a;
+  --warning-soft: #fbf0dc;
   color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-[15px] font-medium transition active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+}
+
+@layer components {
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground shadow-sm shadow-primary/20;
+  }
+  .btn-secondary {
+    @apply btn border border-border bg-card text-foreground;
+  }
+  .btn-ghost {
+    @apply btn min-h-9 px-2 text-muted underline underline-offset-4;
+  }
+  .field-input {
+    @apply min-h-11 w-full rounded-xl border border-border bg-card px-3.5 text-[15px] text-foreground placeholder:text-muted/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none;
+  }
+  .card {
+    @apply rounded-2xl border border-border bg-card p-4 shadow-sm shadow-black/[0.02];
+  }
+  .section-title {
+    @apply text-xs font-semibold tracking-wide text-muted uppercase;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
 }

@@ -66,27 +66,23 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
 
   if (!isOpen) {
     return (
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="self-start text-sm underline"
-      >
+      <button type="button" onClick={() => setIsOpen(true)} className="btn-ghost self-start px-0">
         + Upload/tambah menu lagi
       </button>
     );
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-3">
+    <section className="card flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-black/70">Tambah menu</h2>
+        <h2 className="section-title">Tambah menu</h2>
         <button
           type="button"
           onClick={() => {
             setIsOpen(false);
             reset();
           }}
-          className="text-xs text-black/40"
+          className="text-xs text-muted"
         >
           Tutup
         </button>
@@ -95,7 +91,7 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="w-full rounded-lg border border-dashed border-black/30 px-4 py-4 text-sm text-black/60"
+        className="w-full rounded-xl border border-dashed border-border px-4 py-4 text-sm text-muted"
       >
         Pilih gambar menu susulan
       </button>
@@ -108,8 +104,8 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
         onChange={handleFileChange}
       />
 
-      {isExtracting && <p className="text-sm text-black/60">Membaca menu dari gambar...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {isExtracting && <p className="text-sm text-muted">Membaca menu dari gambar...</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {items && (
         <div className="flex flex-col gap-3">
@@ -119,22 +115,17 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
                 value={item.name}
                 onChange={(e) => updateItemName(index, e.target.value)}
                 placeholder="Nama menu"
-                className="flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm"
+                className="field-input flex-1 text-sm"
               />
-              <button type="button" onClick={() => removeDraftItem(index)} className="text-sm text-red-600">
+              <button type="button" onClick={() => removeDraftItem(index)} className="text-sm text-danger">
                 Hapus
               </button>
             </div>
           ))}
-          <button type="button" onClick={addDraftItem} className="self-start text-sm underline">
+          <button type="button" onClick={addDraftItem} className="btn-ghost self-start px-0 text-sm">
             + Tambah item manual
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="rounded-lg bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
-          >
+          <button type="button" onClick={handleSave} disabled={isSaving} className="btn-primary w-full">
             {isSaving ? "Menyimpan..." : "Simpan ke menu hari ini"}
           </button>
         </div>

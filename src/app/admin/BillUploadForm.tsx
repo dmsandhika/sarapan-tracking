@@ -31,16 +31,16 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
   }
 
   return (
-    <section className="flex flex-col gap-2 rounded-lg border border-black/10 p-3">
-      <h2 className="text-sm font-medium text-black/70">Upload foto bill</h2>
-      <p className="text-xs text-black/50">
+    <section className="card flex flex-col gap-2">
+      <h2 className="section-title">Upload foto bill</h2>
+      <p className="text-xs text-muted">
         Foto bill dari warung (nomor urut + harga) akan otomatis dicocokkan ke pesanan.
       </p>
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
-        className="self-start rounded-lg border border-dashed border-black/30 px-4 py-2 text-sm text-black/60"
+        className="self-start rounded-xl border border-dashed border-border px-4 py-2 text-sm text-muted"
       >
         {isPending ? "Memproses..." : "Pilih foto bill"}
       </button>
@@ -53,18 +53,18 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
         onChange={handleFileChange}
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {result && (
-        <div className="text-sm">
-          <p className="text-green-700">{result.updated} pesanan berhasil diisi harga.</p>
+        <div className="flex flex-col gap-1 text-sm">
+          <p className="text-success">{result.updated} pesanan berhasil diisi harga.</p>
           {result.unmatched.length > 0 && (
-            <p className="text-amber-600">
+            <p className="text-warning">
               Tidak ketemu pesanan untuk nomor urut: {result.unmatched.map((e) => e.nomorUrut).join(", ")}
             </p>
           )}
           {result.stillMissing.length > 0 && (
-            <p className="text-amber-600">
+            <p className="text-warning">
               Nomor urut belum ada harganya: {result.stillMissing.join(", ")}
             </p>
           )}
