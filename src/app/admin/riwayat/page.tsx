@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPastDays } from "@/app/actions/history";
 import { formatDateHuman } from "@/lib/date";
 import { formatRupiah } from "@/lib/currency";
-import { ChevronRightIcon } from "@/components/icons";
+import { ArrowLeftIcon, ChevronRightIcon } from "@/components/icons";
 import CustomerSearch from "./CustomerSearch";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +17,12 @@ export default async function RiwayatPage() {
           <h1 className="text-lg font-semibold">Riwayat Pesanan</h1>
           <p className="text-sm text-muted">Hari-hari sebelumnya</p>
         </div>
-        <Link href="/admin" className="btn-ghost">
-          Kembali
+        <Link
+          href="/admin"
+          aria-label="Kembali"
+          className="flex h-11 w-11 items-center justify-center text-muted"
+        >
+          <ArrowLeftIcon />
         </Link>
       </header>
 

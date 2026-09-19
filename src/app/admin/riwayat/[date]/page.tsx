@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDayDetail } from "@/app/actions/history";
 import { formatDateHuman } from "@/lib/date";
+import { ArrowLeftIcon } from "@/components/icons";
 import OrdersList from "@/app/admin/OrdersList";
 import BillUploadForm from "@/app/admin/BillUploadForm";
 import DaySummary from "@/app/admin/DaySummary";
@@ -25,8 +26,12 @@ export default async function RiwayatDetailPage({
           <h1 className="text-lg font-semibold">{formatDateHuman(day.date)}</h1>
           <p className="text-sm text-muted">Riwayat pesanan</p>
         </div>
-        <Link href="/admin/riwayat" className="btn-ghost">
-          Kembali
+        <Link
+          href="/admin/riwayat"
+          aria-label="Kembali"
+          className="flex h-11 w-11 items-center justify-center text-muted"
+        >
+          <ArrowLeftIcon />
         </Link>
       </header>
 

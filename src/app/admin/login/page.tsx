@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { loginAdmin } from "@/app/actions/admin";
 
 export default function AdminLoginPage() {
@@ -39,6 +40,13 @@ export default function AdminLoginPage() {
           {isPending ? "Masuk..." : "Masuk"}
         </button>
       </form>
+
+      <Link
+        href="/pesan"
+        className="inline-flex items-center justify-center gap-1 text-sm text-muted"
+      >
+        Mau pesan sarapan aja? 👉🏻👈🏻 😚
+      </Link>
     </main>
   );
 }
