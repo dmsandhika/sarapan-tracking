@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { InstallAppButton } from "@/components/InstallAppButton";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="id" className={`${plusJakartaSans.variable} h-full antialiased`}>
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <ServiceWorkerRegister />
+        <InstallAppButton />
         {children}
       </body>
     </html>
