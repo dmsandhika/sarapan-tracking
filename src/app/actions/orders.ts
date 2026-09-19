@@ -3,10 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
 
 const submitOrderSchema = z.object({
   dayId: z.string().min(1),
   name: z.string().trim().min(1, "Nama wajib diisi").max(50),
+  waNumber: z
+    .string()
+    .trim()
+    .min(1, "Nomor WA wajib diisi")
+    .transform(normalizeWaNumber)
+    .refine(isValidWaNumber, "Nomor WA tidak valid"),
   items: z
     .array(
       z.object({
@@ -18,7 +25,7 @@ const submitOrderSchema = z.object({
     .min(1, "Pilih minimal 1 menu"),
 });
 
-export type SubmitOrderInput = z.infer<typeof submitOrderSchema>;
+export type SubmitOrderInput = z.input<typeof submitOrderSchema>;
 
 export async function submitOrder(
   input: SubmitOrderInput
@@ -27,7 +34,7 @@ export async function submitOrder(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
   }
-  const { dayId, name, items } = parsed.data;
+  const { dayId, name, waNumber, items } = parsed.data;
 
   const day = await prisma.day.findUnique({ where: { id: dayId } });
   if (!day || day.status !== "PUBLISHED") {
@@ -47,6 +54,12 @@ export async function submitOrder(
 
   try {
     const order = await prisma.$transaction(async (tx) => {
+      const customer = await tx.customer.upsert({
+        where: { waNumber },
+        update: { name },
+        create: { waNumber, name },
+      });
+
       const last = await tx.order.findFirst({
         where: { dayId },
         orderBy: { nomorUrut: "desc" },
@@ -55,6 +68,7 @@ export async function submitOrder(
       return tx.order.create({
         data: {
           dayId,
+          customerId: customer.id,
           nomorUrut,
           name,
           items: {

@@ -1,17 +1,35 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { submitOrder } from "@/app/actions/orders";
 
 type MenuItem = { id: string; name: string; status: string };
 type Selection = { checked: boolean; qty: number; note: string };
 
+const PROFILE_KEY = "sarapan-tracking:profile";
+
 export default function OrderForm({ dayId, menuItems }: { dayId: string; menuItems: MenuItem[] }) {
   const [name, setName] = useState("");
+  const [waNumber, setWaNumber] = useState("");
   const [selections, setSelections] = useState<Record<string, Selection>>({});
   const [error, setError] = useState<string | null>(null);
   const [nomorUrut, setNomorUrut] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PROFILE_KEY);
+      if (saved) {
+        const profile = JSON.parse(saved) as { name?: string; waNumber?: string };
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydrate from localStorage on mount
+        if (profile.name) setName(profile.name);
+        if (profile.waNumber) setWaNumber(profile.waNumber);
+      }
+    } catch {
+      // ignore malformed/unavailable storage
+    }
+  }, []);
 
   function toggle(menuItemId: string) {
     setSelections((prev) => {
@@ -26,11 +44,16 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
   }
 
   function setQty(menuItemId: string, qty: number) {
+    if (qty < 1) return;
     setSelections((prev) => ({
       ...prev,
       [menuItemId]: { ...(prev[menuItemId] ?? { checked: true, note: "" }), checked: true, qty },
     }));
   }
+
+  const totalItems = Object.values(selections)
+    .filter((s) => s.checked)
+    .reduce((sum, s) => sum + s.qty, 0);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,16 +67,25 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
       setError("Isi nama dulu ya.");
       return;
     }
+    if (waNumber.trim().length === 0) {
+      setError("Isi nomor WA dulu ya.");
+      return;
+    }
     if (items.length === 0) {
       setError("Pilih minimal 1 menu.");
       return;
     }
 
     startTransition(async () => {
-      const result = await submitOrder({ dayId, name: name.trim(), items });
+      const result = await submitOrder({ dayId, name: name.trim(), waNumber: waNumber.trim(), items });
       if ("error" in result) {
         setError(result.error);
       } else {
+        try {
+          localStorage.setItem(PROFILE_KEY, JSON.stringify({ name: name.trim(), waNumber: waNumber.trim() }));
+        } catch {
+          // ignore unavailable storage
+        }
         setNomorUrut(result.nomorUrut);
       }
     });
@@ -61,69 +93,100 @@ export default function OrderForm({ dayId, menuItems }: { dayId: string; menuIte
 
   if (nomorUrut !== null) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
-        <p className="text-sm text-black/60">Pesanan terkirim!</p>
-        <p className="text-3xl font-bold text-green-700">#{nomorUrut}</p>
-        <p className="text-sm text-black/60">Nomor urut kamu, {name}</p>
+      <div className="card flex flex-col items-center gap-2 py-10 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-2xl">
+          ✅
+        </span>
+        <p className="text-sm text-muted">Pesanan terkirim!</p>
+        <p className="text-4xl font-bold text-success">#{nomorUrut}</p>
+        <p className="text-sm text-muted">Nomor urut kamu, {name}</p>
+        <Link href="/status" className="mt-2 text-sm text-primary underline underline-offset-4">
+          Lihat status pesanan →
+        </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 pb-28">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Nama kamu"
         required
-        className="rounded-lg border border-black/10 px-3 py-2"
+        className="field-input"
+      />
+      <input
+        value={waNumber}
+        onChange={(e) => setWaNumber(e.target.value)}
+        placeholder="Nomor WA (untuk cek status pesanan)"
+        inputMode="tel"
+        required
+        className="field-input"
       />
 
-      <div className="flex flex-col divide-y divide-black/5 rounded-lg border border-black/10">
+      <div className="flex flex-col gap-2">
         {menuItems.map((item) => {
           const isHabis = item.status === "HABIS";
           const selection = selections[item.id];
+          const isChecked = selection?.checked ?? false;
           return (
-            <label
+            <div
               key={item.id}
-              className={`flex items-center justify-between gap-2 px-3 py-2 ${
-                isHabis ? "opacity-40" : ""
+              className={`card flex items-center justify-between gap-3 ${
+                isHabis ? "opacity-50" : isChecked ? "border-primary/40 ring-1 ring-primary/20" : ""
               }`}
             >
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  disabled={isHabis}
-                  checked={selection?.checked ?? false}
-                  onChange={() => toggle(item.id)}
-                />
-                {item.name}
-                {isHabis && <span className="text-xs text-red-600">(habis)</span>}
-              </span>
-              {selection?.checked && !isHabis && (
-                <input
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={selection.qty}
-                  onChange={(e) => setQty(item.id, Number(e.target.value))}
-                  className="w-16 rounded-md border border-black/10 px-2 py-1 text-right text-sm"
-                />
+              <button
+                type="button"
+                disabled={isHabis}
+                onClick={() => toggle(item.id)}
+                className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
+              >
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs ${
+                    isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                  }`}
+                >
+                  {isChecked ? "✓" : ""}
+                </span>
+                <span className="text-[15px]">
+                  {item.name}
+                  {isHabis && <span className="ml-2 text-xs text-danger">(habis)</span>}
+                </span>
+              </button>
+
+              {isChecked && !isHabis && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setQty(item.id, selection.qty - 1)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center text-sm font-medium">{selection.qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQty(item.id, selection.qty + 1)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-lg leading-none"
+                  >
+                    +
+                  </button>
+                </div>
               )}
-            </label>
+            </div>
           );
         })}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-lg bg-black px-4 py-2 text-white disabled:opacity-50"
-      >
-        {isPending ? "Mengirim..." : "Kirim Pesanan"}
-      </button>
+      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t border-border bg-background/95 px-5 pt-3 backdrop-blur [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))]">
+        <button type="submit" disabled={isPending} className="btn-primary w-full">
+          {isPending ? "Mengirim..." : totalItems > 0 ? `Kirim Pesanan (${totalItems} item)` : "Kirim Pesanan"}
+        </button>
+      </div>
     </form>
   );
 }

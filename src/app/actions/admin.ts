@@ -128,14 +128,40 @@ export async function removeMenuItem(menuItemId: string): Promise<{ error?: stri
   return {};
 }
 
-export async function toggleMenuItemStatus(menuItemId: string) {
+export async function toggleMenuItemStatus(menuItemId: string, replacementMenuItemId?: string) {
   const item = await prisma.menuItem.findUniqueOrThrow({ where: { id: menuItemId } });
-  await prisma.menuItem.update({
-    where: { id: menuItemId },
-    data: { status: item.status === "AVAILABLE" ? "HABIS" : "AVAILABLE" },
+  const nextStatus = item.status === "AVAILABLE" ? "HABIS" : "AVAILABLE";
+
+  await prisma.$transaction(async (tx) => {
+    await tx.menuItem.update({ where: { id: menuItemId }, data: { status: nextStatus } });
+
+    if (nextStatus === "HABIS" && replacementMenuItemId) {
+      const affected = await tx.orderItem.findMany({ where: { menuItemId } });
+      for (const orderItem of affected) {
+        await tx.orderItem.update({
+          where: { id: orderItem.id },
+          data: {
+            originalMenuItemId: orderItem.originalMenuItemId ?? orderItem.menuItemId,
+            menuItemId: replacementMenuItemId,
+          },
+        });
+      }
+    }
   });
+
   revalidatePath("/admin");
   revalidatePath("/pesan");
+}
+
+export async function renameMenuItem(menuItemId: string, name: string): Promise<{ error?: string }> {
+  const trimmed = name.trim();
+  if (trimmed.length === 0) {
+    return { error: "Nama tidak boleh kosong." };
+  }
+  await prisma.menuItem.update({ where: { id: menuItemId }, data: { name: trimmed } });
+  revalidatePath("/admin");
+  revalidatePath("/pesan");
+  return {};
 }
 
 export async function substituteOrderItem(orderItemId: string, newMenuItemId: string) {
@@ -158,6 +184,11 @@ export async function toggleOrderPaid(orderId: string) {
 
 export async function setOrderBillAmount(orderId: string, amount: number | null) {
   await prisma.order.update({ where: { id: orderId }, data: { billAmount: amount } });
+  revalidatePath("/admin");
+}
+
+export async function deleteOrder(orderId: string) {
+  await prisma.order.delete({ where: { id: orderId } });
   revalidatePath("/admin");
 }
 

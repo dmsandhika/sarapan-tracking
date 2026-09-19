@@ -1,21 +1,29 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount } from "@/app/actions/admin";
+import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount, deleteOrder } from "@/app/actions/admin";
 import type { MenuItemRow, OrderWithItems } from "./types";
 
-function formatRupiah(amount: number) {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-    amount
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
   );
 }
 
 function OrderItemRow({
   item,
   availableMenuItems,
+  allowSubstitution,
 }: {
   item: OrderWithItems["items"][number];
   availableMenuItems: MenuItemRow[];
+  allowSubstitution: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const isHabis = item.menuItem.status === "HABIS";
@@ -25,11 +33,11 @@ function OrderItemRow({
       <span>
         {item.qty}x {item.menuItem.name}
       </span>
-      {item.note && <span className="text-black/50">({item.note})</span>}
+      {item.note && <span className="text-muted">({item.note})</span>}
       {item.originalMenuItem && (
-        <span className="text-xs text-amber-600">diganti dari {item.originalMenuItem.name}</span>
+        <span className="text-xs text-warning">diganti dari {item.originalMenuItem.name}</span>
       )}
-      {isHabis && (
+      {isHabis && allowSubstitution && (
         <select
           disabled={isPending}
           defaultValue=""
@@ -38,7 +46,7 @@ function OrderItemRow({
             if (!newId) return;
             startTransition(() => substituteOrderItem(item.id, newId));
           }}
-          className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-700"
+          className="rounded-lg border border-warning/30 bg-warning-soft px-2 py-1 text-xs text-warning"
         >
           <option value="" disabled>
             Habis, ganti ke...
@@ -71,8 +79,8 @@ function BillAmountCell({ order }: { order: OrderWithItems }) {
       disabled={isPending}
       onChange={(e) => setValue(e.target.value)}
       onBlur={save}
-      placeholder="Belum ada"
-      className="w-24 rounded-md border border-black/10 px-2 py-1 text-right text-sm"
+      placeholder="Rp"
+      className="field-input min-h-9 w-28 text-right text-sm"
     />
   );
 }
@@ -80,47 +88,97 @@ function BillAmountCell({ order }: { order: OrderWithItems }) {
 export default function OrdersList({
   orders,
   menuItems,
+  allowSubstitution = true,
 }: {
   orders: OrderWithItems[];
   menuItems: MenuItemRow[];
+  allowSubstitution?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const availableMenuItems = menuItems.filter((m) => m.status === "AVAILABLE");
 
+  function confirmDelete(orderId: string) {
+    startTransition(() => deleteOrder(orderId));
+    setConfirmingId(null);
+  }
+
   if (orders.length === 0) {
-    return <p className="text-sm text-black/50">Belum ada pesanan masuk.</p>;
+    return (
+      <section className="flex flex-col gap-2">
+        <h2 className="section-title">Pesanan</h2>
+        <p className="card text-sm text-muted">Belum ada pesanan masuk.</p>
+      </section>
+    );
   }
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium text-black/70">Pesanan ({orders.length})</h2>
-      <div className="flex flex-col divide-y divide-black/5 rounded-lg border border-black/10">
+      <h2 className="section-title">Pesanan ({orders.length})</h2>
+      <div className="flex flex-col gap-2">
         {orders.map((order) => (
-          <div key={order.id} className="flex flex-col gap-2 px-3 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/5 text-xs font-semibold">
-                  {order.nomorUrut}
-                </span>
-                <span className="font-medium">{order.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <BillAmountCell order={order} />
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => startTransition(() => toggleOrderPaid(order.id))}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    order.paid ? "bg-green-100 text-green-700" : "bg-black/10 text-black/60"
-                  }`}
-                >
-                  {order.paid ? "Sudah bayar" : "Belum bayar"}
-                </button>
-              </div>
+          <div key={order.id} className="card flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
+                {order.nomorUrut}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium">{order.name}</span>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => setConfirmingId(order.id)}
+                aria-label="Hapus pesanan"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted active:bg-danger-soft active:text-danger"
+              >
+                <TrashIcon />
+              </button>
             </div>
-            <div className="flex flex-col gap-1 pl-8">
+
+            <div className="flex items-center gap-2">
+              <BillAmountCell order={order} />
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => startTransition(() => toggleOrderPaid(order.id))}
+                className={`badge ${order.paid ? "bg-success-soft text-success" : "bg-black/5 text-muted"}`}
+              >
+                {order.paid ? "Lunas" : "Belum bayar"}
+              </button>
+            </div>
+
+            {confirmingId === order.id && (
+              <div className="flex flex-col gap-2 rounded-xl bg-danger-soft p-3">
+                <p className="text-xs text-danger">
+                  Yakin hapus pesanan #{order.nomorUrut} {order.name}? Tidak bisa dibatalkan.
+                </p>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => confirmDelete(order.id)}
+                    className="text-xs font-semibold text-danger underline underline-offset-2"
+                  >
+                    Ya, hapus
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingId(null)}
+                    className="text-xs text-muted"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1 border-t border-border pt-2 pl-1">
               {order.items.map((item) => (
-                <OrderItemRow key={item.id} item={item} availableMenuItems={availableMenuItems} />
+                <OrderItemRow
+                  key={item.id}
+                  item={item}
+                  availableMenuItems={availableMenuItems}
+                  allowSubstitution={allowSubstitution}
+                />
               ))}
             </div>
           </div>
@@ -129,5 +187,3 @@ export default function OrdersList({
     </section>
   );
 }
-
-export { formatRupiah };
