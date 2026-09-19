@@ -7,11 +7,19 @@ import { setAdminSession, clearAdminSession } from "@/lib/auth";
 import {
   extractMenuFromImages,
   extractBillFromImages,
+  isQuotaExhaustedError,
   type ExtractedMenuItem,
   type ExtractedBillEntry,
   type ImageInput,
 } from "@/lib/gemini";
 import { todayJakarta } from "@/lib/date";
+
+function geminiErrorMessage(e: unknown): string {
+  if (isQuotaExhaustedError(e)) {
+    return "Kuota gratis Gemini API hari ini sudah habis (limit 20x/hari). Coba lagi besok, atau isi menu/harga manual dulu.";
+  }
+  return "Gagal membaca gambar. Coba lagi.";
+}
 
 export async function loginAdmin(formData: FormData) {
   const password = String(formData.get("password") ?? "");
@@ -54,7 +62,7 @@ export async function extractMenuImage(
     return { items };
   } catch (e) {
     console.error("extractMenuImage failed:", e);
-    return { error: "Gagal membaca gambar. Coba lagi." };
+    return { error: geminiErrorMessage(e) };
   }
 }
 
@@ -218,7 +226,7 @@ export async function extractBillImage(
     return { entries };
   } catch (e) {
     console.error("extractBillImage failed:", e);
-    return { error: "Gagal membaca foto bill. Coba lagi." };
+    return { error: geminiErrorMessage(e) };
   }
 }
 

@@ -22,12 +22,20 @@ function getAi(): GoogleGenAI {
 
 const MODEL = "gemini-3.6-flash";
 
-function isRetryableStatus(error: unknown): boolean {
+export function isQuotaExhaustedError(error: unknown): boolean {
   const status = (error as { status?: number })?.status;
-  return status === 503 || status === 429;
+  if (status !== 429) return false;
+  const message = (error as { message?: string })?.message ?? "";
+  return message.includes("RESOURCE_EXHAUSTED") || message.includes("PerDay");
 }
 
-async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+function isRetryableStatus(error: unknown): boolean {
+  const status = (error as { status?: number })?.status;
+  if (status === 429) return !isQuotaExhaustedError(error);
+  return status === 503;
+}
+
+async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
   let lastError: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -124,7 +132,7 @@ export async function extractBillFromImages(images: ImageInput[]): Promise<Extra
             ...toImageParts(images),
             {
               text:
-                "Ini foto bill/tagihan dari warung berisi daftar nomor urut pesanan beserta harganya (bisa lebih dari satu gambar, gabungkan jadi satu daftar). Baca setiap baris sebagai pasangan nomor urut + harga. Harga dalam angka Rupiah tanpa titik/koma pemisah ribuan (misal 15000, bukan 15.000). Balas sesuai schema JSON yang diminta.",
+                "Ini foto bill/tagihan dari warung berisi daftar nomor urut pesanan beserta harganya (bisa lebih dari satu gambar, gabungkan jadi satu daftar, boleh tulisan tangan). Baca setiap baris sebagai pasangan nomor urut + harga. Harga dalam angka Rupiah tanpa titik/koma pemisah ribuan (misal 15000, bukan 15.000). PENTING: warung sering nulis harga disingkat tanpa tiga nol di belakang (misal '17' artinya Rp17.000, '13' artinya Rp13.000) — kalau angka yang tertulis kurang dari 1000 (1-2 digit), itu singkatan ribuan, kalikan 1000 jadi harga sebenarnya. Kalau ada baris yang dicoret, digaris, atau ditandai batal, jangan dimasukkan ke hasil. Balas sesuai schema JSON yang diminta.",
             },
           ],
         },
