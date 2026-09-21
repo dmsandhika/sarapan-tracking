@@ -27,7 +27,10 @@ export async function getOrderListWhatsAppUrl(dayId: string): Promise<{ url: str
   const message = day.orders
     .map((order) => {
       const items = order.items
-        .map((item) => (item.qty > 1 ? `${item.qty}x ${item.menuItem.name}` : item.menuItem.name))
+        .map((item) => {
+          const base = item.qty > 1 ? `${item.qty}x ${item.menuItem.name}` : item.menuItem.name;
+          return item.note ? `${base} (${item.note})` : base;
+        })
         .join(" + ");
       return `${order.nomorUrut}. ${items}`;
     })
