@@ -5,6 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
 import { orderItemLabel } from "@/lib/orderItem";
 import { jakartaDateString } from "@/lib/date";
+import {
+  uploadPaymentProof as uploadPaymentProofToStorage,
+  deletePaymentProof as deletePaymentProofFromStorage,
+} from "@/lib/supabaseStorage";
+
+const MAX_PROOF_SIZE = 5 * 1024 * 1024;
 
 export type CustomerOrderHistory = {
   customerName: string;
@@ -24,6 +30,7 @@ export type CustomerOrderHistory = {
     nomorUrut: number;
     paid: boolean;
     billAmount: number | null;
+    hasPaymentProof: boolean;
     items: {
       id: string;
       qty: number;
@@ -110,6 +117,7 @@ export async function getOrderHistory(
       nomorUrut: order.nomorUrut,
       paid: order.paid,
       billAmount: order.billAmount,
+      hasPaymentProof: order.paymentProofPath !== null,
       items: order.items.map((item) => ({
         id: item.id,
         qty: item.qty,
@@ -179,6 +187,64 @@ export async function customerSubstituteOrderItem(
       menuItemId: newMenuItemId,
     },
   });
+  revalidatePath("/status");
+  return {};
+}
+
+export async function uploadPaymentProof(
+  waNumberInput: string,
+  orderId: string,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const waNumber = normalizeWaNumber(waNumberInput);
+  if (!isValidWaNumber(waNumber)) {
+    return { error: "Nomor WA tidak valid." };
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { customer: true },
+  });
+  if (!order) {
+    return { error: "Pesanan tidak ditemukan." };
+  }
+  if (order.customer.waNumber !== waNumber) {
+    return { error: "Nomor WA tidak cocok dengan pesanan ini." };
+  }
+
+  const file = formData.get("proof");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Pilih gambar bukti bayar dulu." };
+  }
+  if (!file.type.startsWith("image/")) {
+    return { error: "File harus berupa gambar." };
+  }
+  if (file.size > MAX_PROOF_SIZE) {
+    return { error: "Ukuran gambar maksimal 5MB." };
+  }
+
+  const ext = file.type.split("/")[1] || "jpg";
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const previousPath = order.paymentProofPath;
+
+  try {
+    const path = await uploadPaymentProofToStorage(orderId, buffer, file.type, ext);
+    await prisma.order.update({ where: { id: orderId }, data: { paymentProofPath: path } });
+  } catch (e) {
+    console.error("uploadPaymentProof failed:", e);
+    return { error: "Gagal upload bukti bayar, coba lagi." };
+  }
+
+  if (previousPath) {
+    // Re-upload ("ganti bukti"): the old file is now orphaned since the DB
+    // only tracks the new path. Best-effort delete — don't fail the whole
+    // upload over cleanup of the old file; a failure here just leaves that
+    // one file behind (harmless, just untracked storage usage).
+    deletePaymentProofFromStorage(previousPath).catch((e) => {
+      console.error("failed to delete previous payment proof:", e);
+    });
+  }
+
   revalidatePath("/status");
   return {};
 }

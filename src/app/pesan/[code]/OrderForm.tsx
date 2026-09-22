@@ -211,6 +211,14 @@ export default function OrderForm(props: Props) {
           Lihat status pesanan
           <ChevronRightIcon />
         </Link>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45 }}
+          className="text-xs text-muted"
+        >
+          Nanti kalau udah ditagih, kamu bisa upload bukti bayar di halaman itu juga.
+        </motion.p>
       </motion.div>
     );
   }

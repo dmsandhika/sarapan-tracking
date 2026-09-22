@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { setAdminSession, clearAdminSession } from "@/lib/auth";
+import { getSignedPaymentProofUrl, deletePaymentProof } from "@/lib/supabaseStorage";
 import {
   extractMenuFromImages,
   extractBillFromImages,
@@ -178,8 +179,15 @@ export async function substituteOrderItem(orderItemId: string, newMenuItemId: st
 
 export async function toggleOrderPaid(orderId: string) {
   const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
-  await prisma.order.update({ where: { id: orderId }, data: { paid: !order.paid } });
+  const paid = !order.paid;
+  await prisma.order.update({ where: { id: orderId }, data: { paid, paidAt: paid ? new Date() : null } });
   revalidatePath("/admin");
+}
+
+export async function getPaymentProofUrl(orderId: string): Promise<string | null> {
+  const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+  if (!order.paymentProofPath) return null;
+  return getSignedPaymentProofUrl(order.paymentProofPath);
 }
 
 export async function setOrderBillAmount(orderId: string, amount: number | null) {
@@ -188,7 +196,14 @@ export async function setOrderBillAmount(orderId: string, amount: number | null)
 }
 
 export async function deleteOrder(orderId: string) {
-  await prisma.order.delete({ where: { id: orderId } });
+  const order = await prisma.order.delete({ where: { id: orderId } });
+  if (order.paymentProofPath) {
+    // The DB row is gone, so nothing will ever reference this file again —
+    // clean it up now instead of leaving it stranded for the cron to never find.
+    deletePaymentProof(order.paymentProofPath).catch((e) => {
+      console.error("failed to delete payment proof for deleted order:", e);
+    });
+  }
   revalidatePath("/admin");
 }
 

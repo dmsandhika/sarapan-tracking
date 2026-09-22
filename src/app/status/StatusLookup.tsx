@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import {
   getOrderHistory,
   listSubstituteOptions,
   customerSubstituteOrderItem,
+  uploadPaymentProof,
   type CustomerOrderHistory,
 } from "@/app/actions/customer";
 import { formatRupiah } from "@/lib/currency";
@@ -31,11 +32,11 @@ const item = {
 function SubstitutePicker({
   orderItemId,
   waNumber,
-  onSubstituted,
+  onRefresh,
 }: {
   orderItemId: string;
   waNumber: string;
-  onSubstituted: () => void;
+  onRefresh: () => void;
 }) {
   const [options, setOptions] = useState<{ id: string; name: string }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +60,7 @@ function SubstitutePicker({
       if (result.error) {
         setError(result.error);
       } else {
-        onSubstituted();
+        onRefresh();
       }
     });
   }
@@ -92,14 +93,75 @@ function SubstitutePicker({
   );
 }
 
+function PaymentProofUpload({
+  orderId,
+  waNumber,
+  hasPaymentProof,
+  onRefresh,
+}: {
+  orderId: string;
+  waNumber: string;
+  hasPaymentProof: boolean;
+  onRefresh: () => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("proof", file);
+
+    startTransition(async () => {
+      const result = await uploadPaymentProof(waNumber, orderId, formData);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        onRefresh();
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-border pt-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs text-muted">
+          {hasPaymentProof ? "Bukti bayar udah dikirim" : "Belum kirim bukti bayar"}
+        </span>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => fileInputRef.current?.click()}
+          className="text-xs font-medium text-primary"
+        >
+          {isPending ? "Mengirim..." : hasPaymentProof ? "Ganti bukti" : "Upload bukti bayar"}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </div>
+      {error && <span className="text-xs text-danger">{error}</span>}
+    </div>
+  );
+}
+
 function OrderCard({
   order,
   waNumber,
-  onSubstituted,
+  onRefresh,
 }: {
   order: CustomerOrderHistory["orders"][number];
   waNumber: string;
-  onSubstituted: () => void;
+  onRefresh: () => void;
 }) {
   return (
     <div className="card flex flex-col gap-2">
@@ -136,7 +198,7 @@ function OrderCard({
               {orderItem.note && <span className="text-xs text-muted">({orderItem.note})</span>}
             </div>
             {orderItem.needsSubstitution && (
-              <SubstitutePicker orderItemId={orderItem.id} waNumber={waNumber} onSubstituted={onSubstituted} />
+              <SubstitutePicker orderItemId={orderItem.id} waNumber={waNumber} onRefresh={onRefresh} />
             )}
           </div>
         ))}
@@ -147,6 +209,15 @@ function OrderCard({
           <span>Tagihan</span>
           <span className="tabular-nums">{formatRupiah(order.billAmount)}</span>
         </div>
+      )}
+
+      {!order.paid && (
+        <PaymentProofUpload
+          orderId={order.id}
+          waNumber={waNumber}
+          hasPaymentProof={order.hasPaymentProof}
+          onRefresh={onRefresh}
+        />
       )}
     </div>
   );
@@ -274,7 +345,7 @@ export default function StatusLookup() {
                     key={order.id}
                     order={order}
                     waNumber={waNumber}
-                    onSubstituted={() => search(waNumber)}
+                    onRefresh={() => search(waNumber)}
                   />
                 ))}
               </div>
@@ -290,7 +361,7 @@ export default function StatusLookup() {
                     key={order.id}
                     order={order}
                     waNumber={waNumber}
-                    onSubstituted={() => search(waNumber)}
+                    onRefresh={() => search(waNumber)}
                   />
                 ))}
               </div>

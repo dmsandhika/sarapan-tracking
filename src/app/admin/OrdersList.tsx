@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount, deleteOrder } from "@/app/actions/admin";
-import { TrashIcon } from "@/components/icons";
+import {
+  substituteOrderItem,
+  toggleOrderPaid,
+  setOrderBillAmount,
+  deleteOrder,
+  getPaymentProofUrl,
+} from "@/app/actions/admin";
+import { TrashIcon, XIcon } from "@/components/icons";
 import { orderItemLabel } from "@/lib/orderItem";
 import type { MenuItemRow, OrderWithItems } from "./types";
 
@@ -73,6 +79,83 @@ function BillAmountCell({ order }: { order: OrderWithItems }) {
       placeholder="Rp"
       className="field-input min-h-9 w-28 rounded-control text-right text-sm tabular-nums"
     />
+  );
+}
+
+function PaymentProofButton({ orderId }: { orderId: string }) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  function handleClick() {
+    setError(null);
+    startTransition(async () => {
+      const url = await getPaymentProofUrl(orderId);
+      if (!url) {
+        setError("Bukti tidak ditemukan.");
+        return;
+      }
+      setPreviewUrl(url);
+    });
+  }
+
+  useEffect(() => {
+    if (!previewUrl) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setPreviewUrl(null);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [previewUrl]);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={handleClick}
+        className="self-start text-xs font-medium text-primary"
+      >
+        {isPending ? "Membuka..." : "Lihat bukti bayar"}
+      </button>
+      {error && <span className="text-xs text-danger">{error}</span>}
+
+      <AnimatePresence>
+        {previewUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewUrl(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/70 p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative flex max-h-full max-w-full flex-col items-center gap-3"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic signed URL, not a local/optimizable asset */}
+              <img
+                src={previewUrl}
+                alt="Bukti bayar"
+                className="max-h-[75vh] max-w-full rounded-card object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setPreviewUrl(null)}
+                aria-label="Tutup"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground"
+              >
+                <XIcon />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -149,6 +232,8 @@ export default function OrdersList({
                 onToggle={() => startTransition(() => toggleOrderPaid(order.id))}
               />
             </div>
+
+            {order.paymentProofPath && <PaymentProofButton orderId={order.id} />}
 
             <AnimatePresence>
               {confirmingId === order.id && (

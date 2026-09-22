@@ -8,9 +8,9 @@ App kecil untuk kelola pesanan patungan (sarapan, kopi, ShopeeFood/GoFood, dll) 
    - **Menu tetap** — upload screenshot menu (tanpa harga) dari story WA warung → AI baca nama-nama menu → admin review/edit → publish. Cocok buat sarapan warung.
    - **Bebas (free-text)** — orang tulis sendiri pesanannya. Cocok buat ShopeeFood/GoFood/kopi.
 2. Admin salin link sesi (`/pesan/<kode>`) dan share ke grup. Orang buka link, isi nama + pilih menu (atau tulis pesanan bebas), submit → dapat **nomor urut** otomatis.
-3. Mode menu tetap: kalau ada lauk habis, admin tandai "Habis" di dashboard → pesanan yang pakai item itu bisa diganti ke item lain.
+3. Mode menu tetap: kalau ada lauk habis, admin tandai "Habis" di dashboard → pesanan yang pakai item itu bisa diganti ke item lain (admin bisa langsung ganti massal, atau customer bisa ganti sendiri item pesanannya lewat `/status`).
 4. Setelah vendor kirim foto bill (nomor urut + harga), admin upload foto itu di halaman sesi → harga otomatis terisi ke tiap pesanan sesuai nomor urutnya.
-5. Admin tandai siapa yang sudah bayar; rekap total tagihan vs terkumpul otomatis muncul per sesi.
+5. Customer bisa upload bukti bayar sendiri di `/status`; admin cek buktinya lalu tandai "Lunas" manual. Bukti bayar otomatis dihapus dari storage 7 hari setelah ditandai lunas (cron mingguan).
 
 ## Setup
 
@@ -27,9 +27,14 @@ DIRECT_URL="postgresql://..."                     # direct connection, dipakai b
 ADMIN_PASSWORD="ganti-ke-password-sendiri"
 GEMINI_API_KEY="AIza..."   # wajib diisi biar fitur baca gambar (menu & bill) jalan
 WARUNG_WA_NUMBER="6281234567890"   # opsional, jadi default nomor WA vendor pas bikin sesi baru
+SUPABASE_URL="https://xxxx.supabase.co"       # buat fitur upload bukti bayar
+SUPABASE_SERVICE_ROLE_KEY="..."               # dari Project Settings > API, JANGAN dipakai di client
+CRON_SECRET="ganti-ke-string-random"          # dicek sama endpoint cleanup, biar cuma Vercel Cron yang bisa manggil
 ```
 
 `GEMINI_API_KEY` didapat gratis dari [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (tinggal login akun Google, generate key, ada free tier).
+
+Fitur bukti bayar butuh bucket Storage baru di dashboard Supabase (bukan lewat migrasi): bikin bucket namanya `payment-proofs`, set **private**.
 
 ## Menjalankan
 
