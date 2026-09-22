@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
       </form>
 
       <Link
-        href="/pesan"
+        href="/"
         className="inline-flex items-center justify-center gap-1 text-sm text-muted"
       >
         Mau pesan sarapan aja? 👉🏻👈🏻 😚
