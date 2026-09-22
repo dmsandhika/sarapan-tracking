@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPastSessionsGroupedByDate } from "@/app/actions/history";
 import { formatDateHuman } from "@/lib/date";
 import { formatRupiah } from "@/lib/currency";
-import { ArrowLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { AnalyticsIcon, ArrowLeftIcon, ChevronRightIcon } from "@/components/icons";
 import CustomerSearch from "./CustomerSearch";
 
 export const dynamic = "force-dynamic";
@@ -17,13 +17,22 @@ export default async function RiwayatPage() {
           <h1 className="text-lg font-semibold">Riwayat Pesanan</h1>
           <p className="text-sm text-muted">Sesi-sesi sebelumnya</p>
         </div>
-        <Link
-          href="/admin"
-          aria-label="Kembali"
-          className="flex h-11 w-11 items-center justify-center text-muted"
-        >
-          <ArrowLeftIcon />
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link
+            href="/admin/analytics"
+            aria-label="Analytics"
+            className="flex h-11 w-11 items-center justify-center text-muted"
+          >
+            <AnalyticsIcon />
+          </Link>
+          <Link
+            href="/admin"
+            aria-label="Kembali"
+            className="flex h-11 w-11 items-center justify-center text-muted"
+          >
+            <ArrowLeftIcon />
+          </Link>
+        </div>
       </header>
 
       <div className="flex-1 px-5 py-5">

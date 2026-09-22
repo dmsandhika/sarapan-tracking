@@ -1,11 +1,15 @@
-export function todayJakarta(): string {
+export function jakartaDateString(date: Date): string {
   // YYYY-MM-DD in Asia/Jakarta, independent of server timezone
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(date);
+}
+
+export function todayJakarta(): string {
+  return jakartaDateString(new Date());
 }
 
 export function formatDateHuman(dateStr: string): string {

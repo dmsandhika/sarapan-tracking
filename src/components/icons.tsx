@@ -104,6 +104,16 @@ export function LinkIcon({ className }: IconProps) {
   );
 }
 
+export function AnalyticsIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="20" height="20" className={className}>
+      <path d="M4 20V10" />
+      <path d="M12 20V4" />
+      <path d="M20 20v-6" />
+    </svg>
+  );
+}
+
 export function XIcon({ className }: IconProps) {
   return (
     <svg {...base} width="14" height="14" className={className}>
