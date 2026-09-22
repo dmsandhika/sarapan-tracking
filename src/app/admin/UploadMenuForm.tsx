@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { extractMenuImage, publishDay } from "@/app/actions/admin";
+import { extractMenuImage, publishMenuSession } from "@/app/actions/admin";
 import type { ExtractedMenuItem } from "@/lib/gemini";
 import GeneratingIndicator from "./GeneratingIndicator";
 import { TrashIcon } from "@/components/icons";
 
-export default function UploadMenuForm() {
+export default function UploadMenuForm({ sessionId }: { sessionId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
   const [items, setItems] = useState<ExtractedMenuItem[] | null>(null);
@@ -58,7 +58,7 @@ export default function UploadMenuForm() {
     setError(null);
     startPublishing(async () => {
       try {
-        await publishDay(cleaned);
+        await publishMenuSession(sessionId, cleaned);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Gagal publish menu.");
       }
@@ -127,7 +127,7 @@ export default function UploadMenuForm() {
           </button>
 
           <button type="button" onClick={handlePublish} disabled={isPublishing} className="btn-primary mt-2 w-full">
-            {isPublishing ? "Publishing..." : "Publish menu hari ini"}
+            {isPublishing ? "Publishing..." : "Publish menu sesi ini"}
           </button>
         </div>
       )}

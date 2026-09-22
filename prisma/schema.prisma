@@ -9,30 +9,37 @@ datasource db {
 }
 
 // Kept as string unions in TS instead of native Prisma enums:
-// DayStatus: "DRAFT" | "PUBLISHED" | "CLOSED"
+// SessionStatus: "DRAFT" | "PUBLISHED" | "CLOSED"
+// SessionMode: "MENU" | "FREETEXT"
 // MenuItemStatus: "AVAILABLE" | "HABIS"
 
-model Day {
-  id        String   @id @default(cuid())
-  date      String   @unique // YYYY-MM-DD
-  status    String   @default("DRAFT")
-  imageUrl  String?
-  createdAt DateTime @default(now())
+model Session {
+  id             String   @id @default(cuid())
+  publicCode     String   @unique
+  title          String
+  date           String // YYYY-MM-DD Asia/Jakarta, date created — not unique
+  mode           String   @default("MENU")
+  status         String   @default("DRAFT")
+  imageUrl       String?
+  vendorWaNumber String?
+  createdAt      DateTime @default(now())
 
   menuItems MenuItem[]
   orders    Order[]
+
+  @@index([date])
 }
 
 model MenuItem {
-  id        String @id @default(cuid())
-  dayId     String
-  day       Day    @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   name      String
-  status    String @default("AVAILABLE")
-  sortOrder Int    @default(0)
+  status    String  @default("AVAILABLE")
+  sortOrder Int     @default(0)
 
-  orderItems         OrderItem[] @relation("CurrentItem")
-  substitutedOrders  OrderItem[] @relation("OriginalItem")
+  orderItems        OrderItem[] @relation("CurrentItem")
+  substitutedOrders OrderItem[] @relation("OriginalItem")
 }
 
 model Customer {
@@ -46,8 +53,8 @@ model Customer {
 
 model Order {
   id         String   @id @default(cuid())
-  dayId      String
-  day        Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  sessionId  String
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
   nomorUrut  Int
@@ -58,17 +65,18 @@ model Order {
 
   items OrderItem[]
 
-  @@unique([dayId, nomorUrut])
+  @@unique([sessionId, nomorUrut])
 }
 
 model OrderItem {
   id                 String    @id @default(cuid())
   orderId            String
   order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItemId         String
-  menuItem           MenuItem  @relation("CurrentItem", fields: [menuItemId], references: [id])
+  menuItemId         String?
+  menuItem           MenuItem? @relation("CurrentItem", fields: [menuItemId], references: [id])
   originalMenuItemId String?
   originalMenuItem   MenuItem? @relation("OriginalItem", fields: [originalMenuItemId], references: [id])
+  customText         String?
   qty                Int       @default(1)
   note               String?
 }

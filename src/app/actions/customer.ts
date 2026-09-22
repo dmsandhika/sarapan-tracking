@@ -2,12 +2,15 @@
 
 import { prisma } from "@/lib/prisma";
 import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
+import { orderItemLabel } from "@/lib/orderItem";
 
 export type CustomerOrderHistory = {
   customerName: string;
   orders: {
     id: string;
     date: string;
+    sessionId: string;
+    sessionTitle: string;
     nomorUrut: number;
     paid: boolean;
     billAmount: number | null;
@@ -35,7 +38,7 @@ export async function getOrderHistory(
       orders: {
         orderBy: { createdAt: "desc" },
         include: {
-          day: true,
+          session: true,
           items: { include: { menuItem: true, originalMenuItem: true } },
         },
       },
@@ -50,14 +53,16 @@ export async function getOrderHistory(
     customerName: customer.name,
     orders: customer.orders.map((order) => ({
       id: order.id,
-      date: order.day.date,
+      date: order.session.date,
+      sessionId: order.sessionId,
+      sessionTitle: order.session.title,
       nomorUrut: order.nomorUrut,
       paid: order.paid,
       billAmount: order.billAmount,
       items: order.items.map((item) => ({
         id: item.id,
         qty: item.qty,
-        name: item.menuItem.name,
+        name: orderItemLabel(item),
         originalName: item.originalMenuItem?.name ?? null,
         note: item.note,
       })),

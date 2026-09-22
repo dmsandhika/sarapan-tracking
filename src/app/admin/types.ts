@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-export type DayWithRelations = Prisma.DayGetPayload<{
+export type SessionWithRelations = Prisma.SessionGetPayload<{
   include: {
     menuItems: true;
     orders: {
@@ -11,14 +11,14 @@ export type DayWithRelations = Prisma.DayGetPayload<{
   };
 }>;
 
-export type OrderWithItems = DayWithRelations["orders"][number];
-export type MenuItemRow = DayWithRelations["menuItems"][number];
+export type OrderWithItems = SessionWithRelations["orders"][number];
+export type MenuItemRow = SessionWithRelations["menuItems"][number];
 
 export type CustomerWithOrders = Prisma.CustomerGetPayload<{
   include: {
     orders: {
       include: {
-        day: true;
+        session: true;
         items: { include: { menuItem: true; originalMenuItem: true } };
       };
     };

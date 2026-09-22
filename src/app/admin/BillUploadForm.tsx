@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { extractBillImage, applyBillEntries, type ApplyBillResult } from "@/app/actions/admin";
 import GeneratingIndicator from "./GeneratingIndicator";
 
-export default function BillUploadForm({ dayId }: { dayId: string }) {
+export default function BillUploadForm({ sessionId }: { sessionId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApplyBillResult | null>(null);
@@ -26,7 +26,7 @@ export default function BillUploadForm({ dayId }: { dayId: string }) {
         setError(extracted.error);
         return;
       }
-      const applied = await applyBillEntries(dayId, extracted.entries);
+      const applied = await applyBillEntries(sessionId, extracted.entries);
       setResult(applied);
     });
   }

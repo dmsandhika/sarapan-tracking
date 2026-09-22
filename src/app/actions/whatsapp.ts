@@ -2,16 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
+import { orderItemLabel } from "@/lib/orderItem";
 
-export async function getOrderListWhatsAppUrl(dayId: string): Promise<{ url: string } | { error: string }> {
-  const rawNumber = process.env.WARUNG_WA_NUMBER ?? "";
-  const number = normalizeWaNumber(rawNumber);
-  if (!isValidWaNumber(number)) {
-    return { error: "Nomor WA belum diset di .env (WARUNG_WA_NUMBER)." };
-  }
-
-  const day = await prisma.day.findUniqueOrThrow({
-    where: { id: dayId },
+export async function getOrderListWhatsAppUrl(sessionId: string): Promise<{ url: string } | { error: string }> {
+  const session = await prisma.session.findUniqueOrThrow({
+    where: { id: sessionId },
     include: {
       orders: {
         orderBy: { nomorUrut: "asc" },
@@ -20,15 +15,21 @@ export async function getOrderListWhatsAppUrl(dayId: string): Promise<{ url: str
     },
   });
 
-  if (day.orders.length === 0) {
-    return { error: "Belum ada pesanan hari ini." };
+  const number = normalizeWaNumber(session.vendorWaNumber ?? "");
+  if (!isValidWaNumber(number)) {
+    return { error: "Nomor WA vendor belum diset untuk sesi ini." };
   }
 
-  const message = day.orders
+  if (session.orders.length === 0) {
+    return { error: "Belum ada pesanan di sesi ini." };
+  }
+
+  const message = session.orders
     .map((order) => {
       const items = order.items
         .map((item) => {
-          const base = item.qty > 1 ? `${item.qty}x ${item.menuItem.name}` : item.menuItem.name;
+          const label = orderItemLabel(item);
+          const base = item.qty > 1 ? `${item.qty}x ${label}` : label;
           return item.note ? `${base} (${item.note})` : base;
         })
         .join(" + ");

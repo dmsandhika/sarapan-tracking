@@ -85,6 +85,25 @@ export function DownloadIcon({ className }: IconProps) {
   );
 }
 
+export function PlusIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="18" height="18" className={className}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+export function LinkIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="18" height="18" className={className}>
+      <path d="M9 17H7a5 5 0 0 1 0-10h2" />
+      <path d="M15 7h2a5 5 0 0 1 0 10h-2" />
+      <path d="M8 12h8" />
+    </svg>
+  );
+}
+
 export function XIcon({ className }: IconProps) {
   return (
     <svg {...base} width="14" height="14" className={className}>

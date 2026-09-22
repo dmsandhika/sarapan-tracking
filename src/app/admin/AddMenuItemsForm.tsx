@@ -6,7 +6,7 @@ import type { ExtractedMenuItem } from "@/lib/gemini";
 import GeneratingIndicator from "./GeneratingIndicator";
 import { TrashIcon } from "@/components/icons";
 
-export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
+export default function AddMenuItemsForm({ sessionId }: { sessionId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<ExtractedMenuItem[] | null>(null);
@@ -60,7 +60,7 @@ export default function AddMenuItemsForm({ dayId }: { dayId: string }) {
       return;
     }
     startSaving(async () => {
-      await addMenuItems(dayId, cleaned);
+      await addMenuItems(sessionId, cleaned);
       setIsOpen(false);
       reset();
     });

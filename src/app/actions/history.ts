@@ -1,48 +1,49 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { todayJakarta } from "@/lib/date";
 import { normalizeWaNumber } from "@/lib/phone";
-import type { DayWithRelations, CustomerWithOrders } from "@/app/admin/types";
+import type { CustomerWithOrders } from "@/app/admin/types";
 
-export type PastDaySummary = {
-  date: string;
+export type PastSessionSummary = {
+  id: string;
+  title: string;
+  mode: string;
   orderCount: number;
   totalBilled: number;
   totalCollected: number;
 };
 
-export async function getPastDays(): Promise<PastDaySummary[]> {
-  const today = todayJakarta();
-  const days = await prisma.day.findMany({
-    where: { date: { lt: today } },
-    orderBy: { date: "desc" },
+export type PastSessionsGroup = {
+  date: string;
+  sessions: PastSessionSummary[];
+};
+
+export async function getPastSessionsGroupedByDate(): Promise<PastSessionsGroup[]> {
+  // Complements listActiveSessions (status !== "CLOSED"): every session ends
+  // up visible in exactly one of the two admin lists, regardless of its date.
+  const sessions = await prisma.session.findMany({
+    where: { status: "CLOSED" },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     include: { orders: true },
   });
 
-  return days
-    .filter((day) => day.orders.length > 0)
-    .map((day) => ({
-      date: day.date,
-      orderCount: day.orders.length,
-      totalBilled: day.orders.reduce((sum, o) => sum + (o.billAmount ?? 0), 0),
-      totalCollected: day.orders.reduce((sum, o) => sum + (o.paid ? o.billAmount ?? 0 : 0), 0),
-    }));
-}
+  const groups = new Map<string, PastSessionSummary[]>();
+  for (const session of sessions) {
+    if (session.orders.length === 0) continue;
+    const summary: PastSessionSummary = {
+      id: session.id,
+      title: session.title,
+      mode: session.mode,
+      orderCount: session.orders.length,
+      totalBilled: session.orders.reduce((sum, o) => sum + (o.billAmount ?? 0), 0),
+      totalCollected: session.orders.reduce((sum, o) => sum + (o.paid ? o.billAmount ?? 0 : 0), 0),
+    };
+    const list = groups.get(session.date) ?? [];
+    list.push(summary);
+    groups.set(session.date, list);
+  }
 
-export async function getDayDetail(date: string): Promise<DayWithRelations | null> {
-  return prisma.day.findUnique({
-    where: { date },
-    include: {
-      menuItems: { orderBy: { sortOrder: "asc" } },
-      orders: {
-        orderBy: { nomorUrut: "asc" },
-        include: {
-          items: { include: { menuItem: true, originalMenuItem: true } },
-        },
-      },
-    },
-  });
+  return Array.from(groups.entries()).map(([date, sessions]) => ({ date, sessions }));
 }
 
 export async function searchCustomerOrders(query: string): Promise<CustomerWithOrders[]> {
@@ -62,7 +63,7 @@ export async function searchCustomerOrders(query: string): Promise<CustomerWithO
       orders: {
         orderBy: { createdAt: "desc" },
         include: {
-          day: true,
+          session: true,
           items: { include: { menuItem: true, originalMenuItem: true } },
         },
       },

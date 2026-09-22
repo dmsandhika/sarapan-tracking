@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { substituteOrderItem, toggleOrderPaid, setOrderBillAmount, deleteOrder } from "@/app/actions/admin";
 import { TrashIcon } from "@/components/icons";
+import { orderItemLabel } from "@/lib/orderItem";
 import type { MenuItemRow, OrderWithItems } from "./types";
 
 function OrderItemRow({
@@ -16,12 +17,12 @@ function OrderItemRow({
   allowSubstitution: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
-  const isHabis = item.menuItem.status === "HABIS";
+  const isHabis = item.menuItem?.status === "HABIS";
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <span>
-        {item.qty}x {item.menuItem.name}
+        {item.qty}x {orderItemLabel(item)}
       </span>
       {item.note && <span className="text-muted">({item.note})</span>}
       {item.originalMenuItem && (

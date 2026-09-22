@@ -7,6 +7,7 @@ import { toggleOrderPaid, setOrderBillAmount } from "@/app/actions/admin";
 import { formatRupiah } from "@/lib/currency";
 import { formatDateHuman } from "@/lib/date";
 import { ChevronRightIcon } from "@/components/icons";
+import { orderItemLabel } from "@/lib/orderItem";
 import type { CustomerWithOrders } from "../types";
 
 function BillAmountCell({ orderId, initial }: { orderId: string; initial: number | null }) {
@@ -58,10 +59,10 @@ function CustomerCard({ customer }: { customer: CustomerWithOrders }) {
         {customer.orders.map((order) => (
           <div key={order.id} className="flex flex-col gap-2 rounded-card border border-border p-2">
             <Link
-              href={`/admin/riwayat/${order.day.date}`}
+              href={`/admin/riwayat/${order.sessionId}`}
               className="inline-flex items-center gap-1 text-sm text-muted"
             >
-              #{order.nomorUrut} · {formatDateHuman(order.day.date)}
+              #{order.nomorUrut} · {order.session.title} · {formatDateHuman(order.session.date)}
               <ChevronRightIcon className="text-muted" />
             </Link>
             <div className="flex items-center gap-3">
@@ -79,7 +80,7 @@ function CustomerCard({ customer }: { customer: CustomerWithOrders }) {
               </button>
             </div>
             <p className="text-sm text-muted">
-              {order.items.map((it) => `${it.qty}x ${it.menuItem.name}`).join(", ")}
+              {order.items.map((it) => `${it.qty}x ${orderItemLabel(it)}`).join(", ")}
             </p>
           </div>
         ))}

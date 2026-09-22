@@ -11,11 +11,14 @@ function OrderCard({ order }: { order: CustomerOrderHistory["orders"][number] })
   return (
     <div className="card flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
             {order.nomorUrut}
           </span>
-          <span className="text-sm text-muted">{formatDateHuman(order.date)}</span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{order.sessionTitle}</p>
+            <p className="text-xs text-muted">{formatDateHuman(order.date)}</p>
+          </div>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 text-sm font-medium ${

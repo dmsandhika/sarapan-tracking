@@ -12,7 +12,6 @@ import {
   type ExtractedBillEntry,
   type ImageInput,
 } from "@/lib/gemini";
-import { todayJakarta } from "@/lib/date";
 
 function geminiErrorMessage(e: unknown): string {
   if (isQuotaExhaustedError(e)) {
@@ -66,60 +65,50 @@ export async function extractMenuImage(
   }
 }
 
-export async function publishDay(items: ExtractedMenuItem[]) {
-  const date = todayJakarta();
-
-  const existing = await prisma.day.findUnique({ where: { date } });
-  if (existing) {
-    const orderCount = await prisma.order.count({ where: { dayId: existing.id } });
-    if (orderCount > 0) {
-      throw new Error("Sudah ada pesanan masuk hari ini, tidak bisa mengganti menu.");
-    }
-    await prisma.menuItem.deleteMany({ where: { dayId: existing.id } });
-    await prisma.menuItem.createMany({
-      data: items.map((item, index) => ({
-        dayId: existing.id,
-        name: item.name,
-        sortOrder: index,
-      })),
-    });
-    await prisma.day.update({ where: { id: existing.id }, data: { status: "PUBLISHED" } });
-  } else {
-    await prisma.day.create({
-      data: {
-        date,
-        status: "PUBLISHED",
-        menuItems: {
-          create: items.map((item, index) => ({ name: item.name, sortOrder: index })),
-        },
-      },
-    });
+export async function publishMenuSession(sessionId: string, items: ExtractedMenuItem[]) {
+  const session = await prisma.session.findUniqueOrThrow({ where: { id: sessionId } });
+  if (session.mode !== "MENU") {
+    throw new Error("Sesi ini bukan mode menu.");
   }
 
+  await prisma.menuItem.createMany({
+    data: items.map((item, index) => ({
+      sessionId,
+      name: item.name,
+      sortOrder: index,
+    })),
+  });
+  await prisma.session.update({ where: { id: sessionId }, data: { status: "PUBLISHED" } });
+
   revalidatePath("/admin");
+  revalidatePath(`/admin/sesi/${sessionId}`);
   revalidatePath("/pesan");
 }
 
-export async function addMenuItems(dayId: string, items: ExtractedMenuItem[]) {
-  const day = await prisma.day.findUniqueOrThrow({
-    where: { id: dayId },
+export async function addMenuItems(sessionId: string, items: ExtractedMenuItem[]) {
+  const session = await prisma.session.findUniqueOrThrow({
+    where: { id: sessionId },
     include: { menuItems: true },
   });
+  if (session.mode !== "MENU") {
+    throw new Error("Sesi ini bukan mode menu.");
+  }
 
-  const existingNames = new Set(day.menuItems.map((m) => m.name.trim().toLowerCase()));
+  const existingNames = new Set(session.menuItems.map((m) => m.name.trim().toLowerCase()));
   const newItems = items.filter((item) => !existingNames.has(item.name.trim().toLowerCase()));
   if (newItems.length === 0) return;
 
-  const startOrder = day.menuItems.length;
+  const startOrder = session.menuItems.length;
   await prisma.menuItem.createMany({
     data: newItems.map((item, index) => ({
-      dayId,
+      sessionId,
       name: item.name,
       sortOrder: startOrder + index,
     })),
   });
 
   revalidatePath("/admin");
+  revalidatePath(`/admin/sesi/${sessionId}`);
   revalidatePath("/pesan");
 }
 
@@ -174,6 +163,9 @@ export async function renameMenuItem(menuItemId: string, name: string): Promise<
 
 export async function substituteOrderItem(orderItemId: string, newMenuItemId: string) {
   const current = await prisma.orderItem.findUniqueOrThrow({ where: { id: orderItemId } });
+  if (current.menuItemId === null) {
+    throw new Error("Item pesanan free-text tidak bisa disubstitusi.");
+  }
   await prisma.orderItem.update({
     where: { id: orderItemId },
     data: {
@@ -198,18 +190,6 @@ export async function setOrderBillAmount(orderId: string, amount: number | null)
 export async function deleteOrder(orderId: string) {
   await prisma.order.delete({ where: { id: orderId } });
   revalidatePath("/admin");
-}
-
-export async function closeDayOrdering(dayId: string) {
-  await prisma.day.update({ where: { id: dayId }, data: { status: "CLOSED" } });
-  revalidatePath("/admin");
-  revalidatePath("/pesan");
-}
-
-export async function reopenDayOrdering(dayId: string) {
-  await prisma.day.update({ where: { id: dayId }, data: { status: "PUBLISHED" } });
-  revalidatePath("/admin");
-  revalidatePath("/pesan");
 }
 
 export async function extractBillImage(
@@ -237,10 +217,10 @@ export type ApplyBillResult = {
 };
 
 export async function applyBillEntries(
-  dayId: string,
+  sessionId: string,
   entries: ExtractedBillEntry[]
 ): Promise<ApplyBillResult> {
-  const orders = await prisma.order.findMany({ where: { dayId } });
+  const orders = await prisma.order.findMany({ where: { sessionId } });
   const orderByNomor = new Map(orders.map((o) => [o.nomorUrut, o]));
 
   const unmatched: ExtractedBillEntry[] = [];
