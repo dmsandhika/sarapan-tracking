@@ -87,13 +87,13 @@ export async function publishMenuSession(sessionId: string, items: ExtractedMenu
 }
 
 export async function addMenuItems(sessionId: string, items: ExtractedMenuItem[]) {
+  // Works for both modes: in MENU sessions these are real orderable items; in
+  // FREETEXT sessions they're just suggestion chips shown alongside the free
+  // text field (never linked to an OrderItem.menuItemId there).
   const session = await prisma.session.findUniqueOrThrow({
     where: { id: sessionId },
     include: { menuItems: true },
   });
-  if (session.mode !== "MENU") {
-    throw new Error("Sesi ini bukan mode menu.");
-  }
 
   const existingNames = new Set(session.menuItems.map((m) => m.name.trim().toLowerCase()));
   const newItems = items.filter((item) => !existingNames.has(item.name.trim().toLowerCase()));

@@ -36,7 +36,7 @@ function newFreeTextRow(): FreeTextRow {
 
 type Props =
   | { sessionId: string; mode: "MENU"; menuItems: MenuItem[] }
-  | { sessionId: string; mode: "FREETEXT"; menuItems?: undefined };
+  | { sessionId: string; mode: "FREETEXT"; menuItems?: undefined; suggestions?: { id: string; name: string }[] };
 
 export default function OrderForm(props: Props) {
   const { sessionId, mode } = props;
@@ -111,6 +111,18 @@ export default function OrderForm(props: Props) {
 
   function addRow() {
     setRows((prev) => [...prev, newFreeTextRow()]);
+  }
+
+  function addSuggestion(name: string) {
+    setRows((prev) => {
+      const emptyIndex = prev.findIndex((r) => r.text.trim().length === 0);
+      if (emptyIndex !== -1) {
+        const next = [...prev];
+        next[emptyIndex] = { ...next[emptyIndex], text: name };
+        return next;
+      }
+      return [...prev, { ...newFreeTextRow(), text: name }];
+    });
   }
 
   const totalItems =
@@ -324,6 +336,23 @@ export default function OrderForm(props: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
+          {props.suggestions && props.suggestions.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted">Saran menu, klik buat nambah cepat</span>
+              <div className="flex flex-wrap gap-2">
+                {props.suggestions.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => addSuggestion(s.name)}
+                    className="rounded-control border border-border bg-card px-3 py-1.5 text-xs text-foreground active:border-primary/40 active:bg-primary-soft active:text-primary"
+                  >
+                    + {s.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <AnimatePresence initial={false}>
             {rows.map((row) => (
               <motion.div

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { closeSessionOrdering, reopenSessionOrdering, deleteSession } from "@/app/actions/sessions";
 import MenuList from "./MenuList";
+import SuggestionMenuList from "./SuggestionMenuList";
 import AddMenuItemsForm from "./AddMenuItemsForm";
 import OrdersList from "./OrdersList";
 import BillUploadForm from "./BillUploadForm";
@@ -61,8 +62,12 @@ export default function SessionDashboard({ session }: { session: SessionWithRela
         </button>
       </div>
 
-      {isMenuMode && <MenuList menuItems={session.menuItems} affectedCounts={affectedCounts} />}
-      {isMenuMode && <AddMenuItemsForm sessionId={session.id} />}
+      {isMenuMode ? (
+        <MenuList menuItems={session.menuItems} affectedCounts={affectedCounts} />
+      ) : (
+        <SuggestionMenuList menuItems={session.menuItems} />
+      )}
+      <AddMenuItemsForm sessionId={session.id} />
 
       <BillUploadForm sessionId={session.id} />
 

@@ -48,7 +48,7 @@ export default async function PesanSessionPage({
         ) : session.mode === "MENU" ? (
           <OrderForm sessionId={session.id} mode="MENU" menuItems={session.menuItems} />
         ) : (
-          <OrderForm sessionId={session.id} mode="FREETEXT" />
+          <OrderForm sessionId={session.id} mode="FREETEXT" suggestions={session.menuItems} />
         )}
       </div>
     </main>
