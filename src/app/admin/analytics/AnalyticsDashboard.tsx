@@ -54,15 +54,17 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsSummary })
         <h2 className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-muted">
           Pesanan 7 hari terakhir
         </h2>
-        <div className="flex h-14 items-end gap-2">
+        <div className="flex items-end gap-2">
           {data.dailyOrders.map((day, index) => (
-            <div key={day.date} className="flex flex-1 flex-col items-center justify-end gap-1.5">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${Math.max(4, (day.count / maxDaily) * 56)}px` }}
-                transition={{ delay: 0.35 + index * 0.05, type: "spring", stiffness: 200, damping: 20 }}
-                className={`w-full rounded-t ${day.date === todayDate ? "bg-primary" : "bg-primary-soft"}`}
-              />
+            <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
+              <div className="flex h-14 w-full items-end">
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(4, (day.count / maxDaily) * 56)}px` }}
+                  transition={{ delay: 0.35 + index * 0.05, type: "spring", stiffness: 200, damping: 20 }}
+                  className={`w-full rounded-t ${day.date === todayDate ? "bg-primary" : "bg-primary-soft"}`}
+                />
+              </div>
               <span className={`text-[10px] ${day.date === todayDate ? "font-semibold text-primary" : "text-muted"}`}>
                 {day.label}
               </span>
