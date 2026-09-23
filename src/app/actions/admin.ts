@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { setAdminSession, clearAdminSession } from "@/lib/auth";
-import { getSignedPaymentProofUrl, deletePaymentProof } from "@/lib/supabaseStorage";
+import { getSignedPaymentProofUrl, deletePaymentProof, downloadPaymentProof } from "@/lib/supabaseStorage";
+import { analyzePaymentProof, type PaymentProofOcrResult } from "@/lib/paymentProofOcr";
 import {
   extractMenuFromImages,
   extractBillFromImages,
@@ -227,10 +228,22 @@ export async function toggleOrderPaid(orderId: string) {
   revalidatePath("/admin");
 }
 
-export async function getPaymentProofUrl(orderId: string): Promise<string | null> {
+export async function getPaymentProofUrl(orderId: string): Promise<{ url: string; path: string } | null> {
   const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
   if (!order.paymentProofPath) return null;
-  return getSignedPaymentProofUrl(order.paymentProofPath);
+  const url = await getSignedPaymentProofUrl(order.paymentProofPath);
+  if (!url) return null;
+  return { url, path: order.paymentProofPath };
+}
+
+export async function getPaymentProofOcr(path: string): Promise<PaymentProofOcrResult> {
+  try {
+    const buffer = await downloadPaymentProof(path);
+    return await analyzePaymentProof(buffer);
+  } catch (e) {
+    console.error("getPaymentProofOcr failed:", e);
+    return { status: "engine-error" };
+  }
 }
 
 export async function setOrderBillAmount(orderId: string, amount: number | null) {

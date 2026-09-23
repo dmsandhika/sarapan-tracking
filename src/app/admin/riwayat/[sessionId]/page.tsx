@@ -8,6 +8,7 @@ import BillUploadForm from "@/app/admin/BillUploadForm";
 import DaySummary from "@/app/admin/DaySummary";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export default async function RiwayatDetailPage({
   params,

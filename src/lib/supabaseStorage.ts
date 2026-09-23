@@ -38,3 +38,9 @@ export async function deletePaymentProof(path: string): Promise<void> {
   const { error } = await getClient().storage.from(BUCKET).remove([path]);
   if (error) throw new Error(error.message);
 }
+
+export async function downloadPaymentProof(path: string): Promise<Buffer> {
+  const { data, error } = await getClient().storage.from(BUCKET).download(path);
+  if (error) throw new Error(error.message);
+  return Buffer.from(await data.arrayBuffer());
+}
