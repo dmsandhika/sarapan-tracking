@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { logoutAdmin } from "@/app/actions/admin";
-import { listActiveSessions } from "@/app/actions/sessions";
+import { listSessionsForAdmin } from "@/app/actions/sessions";
 import { HistoryIcon, LogOutIcon } from "@/components/icons";
 import CreateSessionForm from "./CreateSessionForm";
 import SessionList from "./SessionList";
@@ -9,14 +9,14 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60; // extraction via Gemini can take a few seconds
 
 export default async function AdminPage() {
-  const sessions = await listActiveSessions();
+  const sessions = await listSessionsForAdmin();
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 pt-6 pb-4 backdrop-blur">
         <div>
           <h1 className="text-lg font-semibold">Admin Jompesan</h1>
-          <p className="text-sm text-muted">Sesi pemesanan aktif</p>
+          <p className="text-sm text-muted">Semua sesi, hari ini &amp; aktif di atas</p>
         </div>
         <div className="flex items-center gap-1">
           <Link

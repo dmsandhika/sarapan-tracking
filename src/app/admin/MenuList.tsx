@@ -2,7 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { toggleMenuItemStatus, removeMenuItem, renameMenuItem } from "@/app/actions/admin";
+import {
+  toggleMenuItemStatus,
+  removeMenuItem,
+  renameMenuItem,
+  limitMenuItemStock,
+} from "@/app/actions/admin";
 import { PencilIcon, TrashIcon } from "@/components/icons";
 import type { MenuItemRow } from "./types";
 
@@ -21,6 +26,10 @@ export default function MenuList({
 
   const [substitutingId, setSubstitutingId] = useState<string | null>(null);
   const [replacementChoice, setReplacementChoice] = useState("");
+
+  const [limitingId, setLimitingId] = useState<string | null>(null);
+  const [keepCount, setKeepCount] = useState("");
+  const [limitReplacementChoice, setLimitReplacementChoice] = useState("");
 
   function handleRemove(menuItemId: string) {
     setError(null);
@@ -62,6 +71,35 @@ export default function MenuList({
   function confirmSubstitute(menuItemId: string, replacementId?: string) {
     startTransition(() => toggleMenuItemStatus(menuItemId, replacementId));
     setSubstitutingId(null);
+  }
+
+  function startLimitStock(item: MenuItemRow) {
+    setError(null);
+    setLimitingId(item.id);
+    setKeepCount("");
+    setLimitReplacementChoice("");
+  }
+
+  function confirmLimitStock(menuItemId: string) {
+    const count = Number(keepCount);
+    if (!Number.isInteger(count) || count < 0) {
+      setError("Isi jumlah sisa stok yang valid.");
+      return;
+    }
+    const affected = affectedCounts[menuItemId] ?? 0;
+    if (count < affected && !limitReplacementChoice) {
+      setError("Pilih menu pengganti buat sisanya.");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await limitMenuItemStock(menuItemId, count, limitReplacementChoice);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setLimitingId(null);
+    });
   }
 
   return (
@@ -127,6 +165,16 @@ export default function MenuList({
                         />
                         {isHabis ? "Tandai tersedia" : "Tandai habis"}
                       </button>
+                      {affected > 0 && (
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => startLimitStock(item)}
+                          className="text-sm font-medium text-muted"
+                        >
+                          Batasi stok
+                        </button>
+                      )}
                       <button
                         type="button"
                         disabled={isPending}
@@ -200,6 +248,61 @@ export default function MenuList({
                           Batal
                         </button>
                       </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {limitingId === item.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col gap-3 rounded-card border border-warning/30 p-3">
+                      <p className="text-sm text-warning">
+                        {affected} pesanan pakai menu ini. Berapa yang masih bisa dipenuhi warung?
+                        Sisanya (diurutkan dari yang pesan paling awal) otomatis diganti.
+                      </p>
+                      <input
+                        type="number"
+                        min={0}
+                        inputMode="numeric"
+                        value={keepCount}
+                        onChange={(e) => setKeepCount(e.target.value)}
+                        placeholder="Sisa stok, misal: 2"
+                        className="field-input min-h-9 rounded-control text-sm"
+                      />
+                      <select
+                        value={limitReplacementChoice}
+                        onChange={(e) => setLimitReplacementChoice(e.target.value)}
+                        className="field-input min-h-9 rounded-control text-sm"
+                      >
+                        <option value="">Pilih menu pengganti buat sisanya...</option>
+                        {otherAvailableItems.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => confirmLimitStock(item.id)}
+                        className="btn-primary w-full"
+                      >
+                        Terapkan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLimitingId(null)}
+                        className="self-end text-sm text-muted"
+                      >
+                        Batal
+                      </button>
                     </div>
                   </motion.div>
                 )}

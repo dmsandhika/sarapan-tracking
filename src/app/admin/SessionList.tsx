@@ -11,7 +11,7 @@ type SessionListItem = {
 
 export default function SessionList({ sessions }: { sessions: SessionListItem[] }) {
   if (sessions.length === 0) {
-    return <p className="card text-sm text-muted">Belum ada sesi aktif. Buat sesi baru di atas.</p>;
+    return <p className="card text-sm text-muted">Belum ada sesi. Buat sesi baru di atas.</p>;
   }
 
   return (

@@ -65,12 +65,14 @@ export default async function RiwayatPage() {
                               <p className="text-sm font-medium tabular-nums">
                                 {formatRupiah(session.totalBilled)}
                               </p>
-                              {belumTerkumpul > 0 ? (
+                              {session.allPaid ? (
+                                <p className="text-xs text-success">Lunas semua</p>
+                              ) : session.totalBilled > 0 ? (
                                 <p className="text-xs tabular-nums text-danger">
                                   Belum terkumpul {formatRupiah(belumTerkumpul)}
                                 </p>
                               ) : (
-                                <p className="text-xs text-success">Lunas semua</p>
+                                <p className="text-xs text-muted">Belum ada tagihan diinput</p>
                               )}
                             </div>
                             <ChevronRightIcon className="shrink-0 text-muted" />

@@ -151,6 +151,49 @@ export async function toggleMenuItemStatus(menuItemId: string, replacementMenuIt
   revalidatePath("/pesan");
 }
 
+export async function limitMenuItemStock(
+  menuItemId: string,
+  keepCount: number,
+  replacementMenuItemId: string
+): Promise<{ error?: string; substitutedCount?: number }> {
+  if (!Number.isInteger(keepCount) || keepCount < 0) {
+    return { error: "Jumlah sisa stok tidak valid." };
+  }
+
+  // Earliest orderers (lowest nomorUrut) keep the item; anyone beyond the
+  // fulfillable count gets bumped to the replacement, in order — first come,
+  // first served. Menu item's own status is left untouched on purpose: this
+  // only resolves the orders already placed, it's not a "mark habis" action.
+  const orderItems = await prisma.orderItem.findMany({
+    where: { menuItemId },
+    include: { order: true },
+    orderBy: { order: { nomorUrut: "asc" } },
+  });
+
+  const toSubstitute = orderItems.slice(keepCount);
+  if (toSubstitute.length === 0) {
+    return { substitutedCount: 0 };
+  }
+  if (!replacementMenuItemId) {
+    return { error: "Pilih menu pengganti buat sisanya." };
+  }
+
+  await prisma.$transaction(
+    toSubstitute.map((item) =>
+      prisma.orderItem.update({
+        where: { id: item.id },
+        data: {
+          originalMenuItemId: item.originalMenuItemId ?? item.menuItemId,
+          menuItemId: replacementMenuItemId,
+        },
+      })
+    )
+  );
+
+  revalidatePath("/admin");
+  return { substitutedCount: toSubstitute.length };
+}
+
 export async function renameMenuItem(menuItemId: string, name: string): Promise<{ error?: string }> {
   const trimmed = name.trim();
   if (trimmed.length === 0) {

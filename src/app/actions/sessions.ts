@@ -52,11 +52,20 @@ export async function createSession(input: {
   redirect(`/admin/sesi/${session.id}`);
 }
 
-export async function listActiveSessions() {
-  return prisma.session.findMany({
-    where: { status: { not: "CLOSED" } },
+export async function listSessionsForAdmin() {
+  const today = todayJakarta();
+  const sessions = await prisma.session.findMany({
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { orders: true } } },
+  });
+
+  // Today's sessions and anything still open float to the top; older closed
+  // sessions sink below, most recent first (stable sort keeps that ordering
+  // within each group since the query above already sorted by createdAt).
+  return sessions.sort((a, b) => {
+    const aPriority = a.date === today || a.status !== "CLOSED" ? 1 : 0;
+    const bPriority = b.date === today || b.status !== "CLOSED" ? 1 : 0;
+    return bPriority - aPriority;
   });
 }
 
