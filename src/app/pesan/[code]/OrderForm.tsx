@@ -271,7 +271,7 @@ export default function OrderForm(props: Props) {
                     type="button"
                     disabled={isHabis}
                     onClick={() => toggle(item.id)}
-                    className="flex flex-1 items-center gap-3 text-left disabled:pointer-events-none"
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:pointer-events-none"
                   >
                     <span
                       className={`flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-control border transition-colors duration-200 ${
@@ -299,7 +299,7 @@ export default function OrderForm(props: Props) {
                         )}
                       </AnimatePresence>
                     </span>
-                    <span className="text-sm">
+                    <span className="min-w-0 break-words text-sm">
                       {item.name}
                       {isHabis && <span className="ml-2 text-xs text-danger">(habis)</span>}
                     </span>
@@ -307,7 +307,9 @@ export default function OrderForm(props: Props) {
 
                   <AnimatePresence>
                     {isChecked && !isHabis && (
-                      <QtyStepper qty={selection.qty} onChange={(qty) => setQty(item.id, qty)} />
+                      <div className="shrink-0">
+                        <QtyStepper qty={selection.qty} onChange={(qty) => setQty(item.id, qty)} />
+                      </div>
                     )}
                   </AnimatePresence>
                 </div>
