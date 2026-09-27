@@ -9,6 +9,7 @@ import OrdersList from "./OrdersList";
 import BillUploadForm from "./BillUploadForm";
 import DaySummary from "./DaySummary";
 import SendToWhatsAppButton from "./SendToWhatsAppButton";
+import SendUnpaidListButton from "./SendUnpaidListButton";
 import CopyLinkButton from "./CopyLinkButton";
 import type { SessionWithRelations } from "./types";
 
@@ -76,6 +77,8 @@ export default function SessionDashboard({ session }: { session: SessionWithRela
       <OrdersList orders={session.orders} menuItems={session.menuItems} allowSubstitution={isMenuMode} />
 
       <DaySummary orders={session.orders} />
+
+      <SendUnpaidListButton sessionId={session.id} />
 
       {session.orders.length === 0 && (
         <div className="card flex flex-col gap-2">
