@@ -45,6 +45,7 @@ export default function OrderForm(props: Props) {
   const [selections, setSelections] = useState<Record<string, MenuSelection>>({});
   const [rows, setRows] = useState<FreeTextRow[]>(() => [newFreeTextRow()]);
   const [error, setError] = useState<string | null>(null);
+  const [paymentRequired, setPaymentRequired] = useState(false);
   const [nomorUrut, setNomorUrut] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -135,6 +136,7 @@ export default function OrderForm(props: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setPaymentRequired(false);
 
     if (name.trim().length === 0) {
       setError("Isi nama dulu ya.");
@@ -163,6 +165,7 @@ export default function OrderForm(props: Props) {
       const result = await submitOrder({ sessionId, name: name.trim(), waNumber: waNumber.trim(), items });
       if ("error" in result) {
         setError(result.error);
+        setPaymentRequired(result.paymentRequired === true);
       } else {
         try {
           localStorage.setItem(PROFILE_KEY, JSON.stringify({ name: name.trim(), waNumber: waNumber.trim() }));
@@ -401,7 +404,16 @@ export default function OrderForm(props: Props) {
         </div>
       )}
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && (
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-danger">{error}</p>
+          {paymentRequired && (
+            <Link href="/status" className="text-sm text-primary underline underline-offset-4">
+              Cek pesanan &amp; upload bukti bayar
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t border-border bg-background/95 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
         <button type="submit" disabled={isPending} className="btn-primary w-full">

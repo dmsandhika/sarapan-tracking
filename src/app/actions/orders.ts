@@ -5,6 +5,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
 
+const MAX_UNPAID_ORDERS = 2;
+const UNPAID_ORDER_ERROR = "Kamu punya 2 pesanan yang belum lunas. Bayar dulu dan tunggu admin mengonfirmasi pembayaran sebelum pesan lagi. Cek pesananmu di halaman Status Pesanan.";
+
 const submitOrderSchema = z.object({
   sessionId: z.string().min(1),
   name: z.string().trim().min(1, "Nama wajib diisi").max(50),
@@ -30,7 +33,7 @@ export type SubmitOrderInput = z.input<typeof submitOrderSchema>;
 
 export async function submitOrder(
   input: SubmitOrderInput
-): Promise<{ nomorUrut: number } | { error: string }> {
+): Promise<{ nomorUrut: number } | { error: string; paymentRequired?: boolean }> {
   const parsed = submitOrderSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
@@ -70,6 +73,16 @@ export async function submitOrder(
         create: { waNumber, name },
       });
 
+      // Serialize submissions for the same WA number so concurrent requests
+      // cannot both pass the unpaid limit before either creates an order.
+      await tx.$queryRaw`SELECT id FROM "Customer" WHERE id = ${customer.id} FOR UPDATE`;
+      const unpaidCount = await tx.order.count({
+        where: { customerId: customer.id, paid: false },
+      });
+      if (unpaidCount >= MAX_UNPAID_ORDERS) {
+        return null;
+      }
+
       const last = await tx.order.findFirst({
         where: { sessionId },
         orderBy: { nomorUrut: "desc" },
@@ -91,6 +104,8 @@ export async function submitOrder(
         },
       });
     });
+
+    if (!order) return { error: UNPAID_ORDER_ERROR, paymentRequired: true };
 
     revalidatePath("/admin");
     revalidatePath(`/admin/sesi/${sessionId}`);
