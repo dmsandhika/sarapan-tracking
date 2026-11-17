@@ -30,7 +30,7 @@ export async function createSession(input: {
   }
 
   let warung: Awaited<ReturnType<typeof prisma.warung.findUnique>> = null;
-  let warungItems: { name: string; price: number | null }[] = [];
+  let warungItems: { name: string }[] = [];
   if (input.warungId && input.mode === "MENU") {
     warung = await prisma.warung.findUnique({ where: { id: input.warungId } });
     if (!warung) throw new Error("Warung tidak ditemukan.");
@@ -39,7 +39,7 @@ export async function createSession(input: {
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
     if (found.length === 0) throw new Error("Pilih minimal 1 lauk yang ready.");
-    warungItems = found.map((i) => ({ name: i.name, price: i.price }));
+    warungItems = found.map((i) => ({ name: i.name }));
   }
 
   const vendorInput = input.vendorWaNumber?.trim() || warung?.waNumber || "";
@@ -61,7 +61,7 @@ export async function createSession(input: {
       vendorWaNumber,
       warungId: warung?.id ?? null,
       menuItems: {
-        create: warungItems.map((item, index) => ({ name: item.name, price: item.price, sortOrder: index })),
+        create: warungItems.map((item, index) => ({ name: item.name, sortOrder: index })),
       },
     },
   });

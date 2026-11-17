@@ -27,7 +27,7 @@ export default async function WarungDetailPage({ params }: { params: Promise<{ i
       <div className="flex-1 px-5 py-5">
         <WarungDetail
           warung={{ id: warung.id, name: warung.name, waNumber: warung.waNumber, note: warung.note }}
-          items={warung.items.map((i) => ({ id: i.id, name: i.name, price: i.price }))}
+          items={warung.items.map((i) => ({ id: i.id, name: i.name }))}
         />
       </div>
     </main>

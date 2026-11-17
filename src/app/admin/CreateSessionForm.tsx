@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { createSession } from "@/app/actions/sessions";
 import { PlusIcon } from "@/components/icons";
 import type { WarungForSessionForm } from "@/app/actions/warung";
-import { formatRupiah } from "@/lib/currency";
 
 export default function CreateSessionForm({
   defaultVendorWaNumber,
@@ -163,7 +162,6 @@ export default function CreateSessionForm({
                       <label key={item.id} className="flex min-h-11 cursor-pointer items-center gap-3 border-b border-line py-1 last:border-b-0">
                         <input type="checkbox" checked={on} onChange={() => toggleItem(item.id)} className="h-5 w-5 accent-[var(--accent)]" />
                         <span className={`flex-1 text-[15px] ${on ? "" : "text-muted line-through"}`}>{item.name}</span>
-                        {item.price != null && <span className="text-sm tabular-nums text-muted">{formatRupiah(item.price)}</span>}
                       </label>
                     );
                   })}

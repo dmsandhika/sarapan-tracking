@@ -48,9 +48,6 @@ export async function submitOrder(
     return { error: "Pemesanan sesi ini sudah ditutup." };
   }
 
-  // Kalau semua lauk punya harga, total tagihan dihitung otomatis.
-  let autoBillAmount: number | null = null;
-
   if (session.mode === "MENU") {
     if (items.some((i) => !i.menuItemId)) {
       return { error: "Data item tidak valid." };
@@ -64,13 +61,6 @@ export async function submitOrder(
     });
     if (unavailable) {
       return { error: "Ada menu yang sudah habis/tidak tersedia. Refresh halaman dulu." };
-    }
-    const priced = items.map((i) => {
-      const price = menuItems.find((m) => m.id === i.menuItemId)?.price;
-      return price == null ? null : price * i.qty;
-    });
-    if (priced.every((p) => p !== null)) {
-      autoBillAmount = (priced as number[]).reduce((a, b) => a + b, 0);
     }
   } else {
     if (items.some((i) => !i.customText)) {
@@ -109,7 +99,6 @@ export async function submitOrder(
           customerId: customer.id,
           nomorUrut,
           name,
-          billAmount: autoBillAmount,
           items: {
             create: items.map((i) =>
               session.mode === "MENU"

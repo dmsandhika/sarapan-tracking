@@ -13,20 +13,18 @@ import { TrashIcon } from "@/components/icons";
 import GeneratingIndicator from "../../GeneratingIndicator";
 
 type Warung = { id: string; name: string; waNumber: string | null; note: string | null };
-type Item = { id: string; name: string; price: number | null };
+type Item = { id: string; name: string };
 
 function ItemRow({ item }: { item: Item }) {
   const [name, setName] = useState(item.name);
-  const [price, setPrice] = useState(item.price?.toString() ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function save() {
-    const p = price.trim() === "" ? null : Number(price);
-    if (name.trim() === item.name && p === item.price) return;
+    if (name.trim() === item.name) return;
     setError(null);
     startTransition(async () => {
-      const result = await updateWarungItem(item.id, { name, price: p });
+      const result = await updateWarungItem(item.id, { name });
       if ("error" in result) setError(result.error);
     });
   }
@@ -41,17 +39,6 @@ function ItemRow({ item }: { item: Item }) {
           disabled={isPending}
           aria-label="Nama lauk"
           className="field-input min-h-11"
-        />
-        <input
-          type="number"
-          inputMode="numeric"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          onBlur={save}
-          disabled={isPending}
-          placeholder="Rp"
-          aria-label="Harga"
-          className="field-input min-h-11 w-28 text-right tabular-nums"
         />
         <button
           type="button"
@@ -71,7 +58,6 @@ function ItemRow({ item }: { item: Item }) {
 function AddItems({ warungId }: { warungId: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isReading, startReading] = useTransition();
@@ -80,11 +66,10 @@ function AddItems({ warungId }: { warungId: string }) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await addWarungItems(warungId, [{ name, price: price.trim() === "" ? null : Number(price) }]);
+      const result = await addWarungItems(warungId, [{ name }]);
       if ("error" in result) setError(result.error);
       else {
         setName("");
-        setPrice("");
       }
     });
   }
@@ -112,15 +97,6 @@ function AddItems({ warungId }: { warungId: string }) {
       <h2 className="section-title">Tambah lauk</h2>
       <form onSubmit={add} className="flex gap-2">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lauk" className="field-input" />
-        <input
-          type="number"
-          inputMode="numeric"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          placeholder="Rp"
-          aria-label="Harga (opsional)"
-          className="field-input w-28 text-right tabular-nums"
-        />
         <button type="submit" disabled={isPending || !name.trim()} className="btn-primary shrink-0 px-4">
           +
         </button>
@@ -130,7 +106,6 @@ function AddItems({ warungId }: { warungId: string }) {
         Baca dari foto menu
       </button>
       {isReading && <GeneratingIndicator variant="menu" />}
-      <p className="text-xs text-muted">Harga opsional. Kalau semua lauk di pesanan punya harga, total tagihan dihitung otomatis.</p>
       {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
@@ -174,7 +149,7 @@ export default function WarungDetail({ warung, items }: { warung: Warung; items:
         ) : (
           <div className="card py-2">
             {items.map((item) => (
-              <ItemRow key={`${item.id}:${item.name}:${item.price}`} item={item} />
+              <ItemRow key={`${item.id}:${item.name}`} item={item} />
             ))}
           </div>
         )}

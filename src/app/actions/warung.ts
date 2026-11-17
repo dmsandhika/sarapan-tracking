@@ -9,12 +9,6 @@ import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
 type Result = { ok: true } | { error: string };
 const UNAUTHORIZED = { error: "Tidak diizinkan." } as const;
 
-function parsePrice(price: number | null | undefined): number | null | "invalid" {
-  if (price == null) return null;
-  if (!Number.isInteger(price) || price < 0 || price > 10_000_000) return "invalid";
-  return price;
-}
-
 function parseWa(input: string | undefined): string | null | "invalid" {
   const trimmed = input?.trim();
   if (!trimmed) return null;
@@ -43,7 +37,7 @@ export type WarungForSessionForm = {
   id: string;
   name: string;
   waNumber: string | null;
-  items: { id: string; name: string; price: number | null; defaultChecked: boolean }[];
+  items: { id: string; name: string; defaultChecked: boolean }[];
 };
 
 /** Data untuk form buat sesi. Centang default mengikuti menu sesi terakhir di warung itu. */
@@ -67,7 +61,6 @@ export async function listWarungsForSessionForm(): Promise<WarungForSessionForm[
       items: w.items.map((i) => ({
         id: i.id,
         name: i.name,
-        price: i.price,
         // Ikut sesi terakhir; lauk yang ditambahkan setelah sesi itu otomatis tercentang supaya tidak terlewat.
         defaultChecked:
           !last || !lastNames ? true : lastNames.has(i.name.trim().toLowerCase()) || i.createdAt > last.createdAt,
@@ -115,20 +108,18 @@ export async function deleteWarung(id: string) {
 
 export async function addWarungItems(
   warungId: string,
-  items: { name: string; price?: number | null }[]
+  items: { name: string }[]
 ): Promise<Result> {
   if (!(await isAdminAuthenticated())) return UNAUTHORIZED;
   const existing = await prisma.warungMenuItem.findMany({ where: { warungId } });
   const seen = new Set(existing.map((i) => i.name.trim().toLowerCase()));
-  const data: { warungId: string; name: string; price: number | null; sortOrder: number }[] = [];
+  const data: { warungId: string; name: string; sortOrder: number }[] = [];
   for (const item of items) {
     const name = item.name.trim();
     const key = name.toLowerCase();
     if (!name || seen.has(key)) continue;
-    const price = parsePrice(item.price);
-    if (price === "invalid") return { error: `Harga "${name}" tidak valid.` };
     seen.add(key);
-    data.push({ warungId, name, price, sortOrder: existing.length + data.length });
+    data.push({ warungId, name, sortOrder: existing.length + data.length });
   }
   if (data.length === 0) return { error: "Tidak ada lauk baru (kosong atau sudah ada)." };
   await prisma.warungMenuItem.createMany({ data });
@@ -139,14 +130,12 @@ export async function addWarungItems(
 
 export async function updateWarungItem(
   itemId: string,
-  input: { name: string; price: number | null }
+  input: { name: string }
 ): Promise<Result> {
   if (!(await isAdminAuthenticated())) return UNAUTHORIZED;
   const name = input.name.trim();
   if (!name) return { error: "Nama lauk wajib diisi." };
-  const price = parsePrice(input.price);
-  if (price === "invalid") return { error: "Harga tidak valid." };
-  const item = await prisma.warungMenuItem.update({ where: { id: itemId }, data: { name, price } });
+  const item = await prisma.warungMenuItem.update({ where: { id: itemId }, data: { name } });
   revalidatePath(`/admin/warung/${item.warungId}`);
   return { ok: true };
 }
