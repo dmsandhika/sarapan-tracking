@@ -1,7 +1,4 @@
 -- AlterTable
-ALTER TABLE "MenuItem" ADD COLUMN     "price" INTEGER;
-
--- AlterTable
 ALTER TABLE "Session" ADD COLUMN     "warungId" TEXT;
 
 -- CreateTable
@@ -20,7 +17,6 @@ CREATE TABLE "WarungMenuItem" (
     "id" TEXT NOT NULL,
     "warungId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "price" INTEGER,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

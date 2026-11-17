@@ -39,7 +39,6 @@ model MenuItem {
   name      String
   status    String  @default("AVAILABLE")
   sortOrder Int     @default(0)
-  price     Int? // snapshot harga dari WarungMenuItem, opsional
 
   orderItems        OrderItem[] @relation("CurrentItem")
   substitutedOrders OrderItem[] @relation("OriginalItem")
@@ -111,7 +110,6 @@ model WarungMenuItem {
   warungId  String
   warung    Warung  @relation(fields: [warungId], references: [id], onDelete: Cascade)
   name      String
-  price     Int?
   sortOrder Int     @default(0)
   createdAt DateTime @default(now())
 }
