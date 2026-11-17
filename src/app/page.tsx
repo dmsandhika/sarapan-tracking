@@ -7,7 +7,7 @@ export default function Home() {
       <div className="flex flex-col items-center gap-4">
         <Logo size={64} />
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="font-display text-4xl font-extrabold tracking-tight">
             <span className="text-foreground">Jom</span>
             <span className="text-primary">pesan</span>
           </h1>

@@ -128,7 +128,7 @@ function PaymentProofUpload({
   }
 
   return (
-    <div className="flex flex-col gap-1.5 border-t border-border pt-2">
+    <div className="flex flex-col gap-1.5 border-t border-line pt-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-muted">
           {hasPaymentProof ? "Bukti bayar udah dikirim" : "Belum kirim bukti bayar"}
@@ -185,7 +185,7 @@ function OrderCard({
         </span>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-border pt-2 text-sm">
+      <div className="flex flex-col gap-2 border-t border-line pt-2 text-sm">
         {order.items.map((orderItem) => (
           <div key={orderItem.id} className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -205,7 +205,7 @@ function OrderCard({
       </div>
 
       {order.billAmount != null && (
-        <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-medium">
+        <div className="flex items-center justify-between border-t border-line pt-2 text-sm font-medium">
           <span>Tagihan</span>
           <span className="tabular-nums">{formatRupiah(order.billAmount)}</span>
         </div>

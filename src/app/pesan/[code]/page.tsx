@@ -21,7 +21,7 @@ export default async function PesanSessionPage({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col">
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/90 px-5 pt-6 pb-4 backdrop-blur">
+      <header className="sticky top-0 z-10 flex items-center gap-3 app-header">
         <Logo size={32} />
         <div className="min-w-0">
           <h1 className="truncate text-lg font-semibold">{session.title}</h1>

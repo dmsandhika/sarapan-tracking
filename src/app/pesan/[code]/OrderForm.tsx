@@ -266,7 +266,7 @@ export default function OrderForm(props: Props) {
               <div
                 key={item.id}
                 className={`card flex flex-col gap-2 transition-colors duration-200 ${
-                  isHabis ? "opacity-50" : isChecked ? "border-primary/40 ring-1 ring-primary/20" : ""
+                  isHabis ? "opacity-50" : isChecked ? "bg-primary-soft" : ""
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -277,8 +277,8 @@ export default function OrderForm(props: Props) {
                     className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:pointer-events-none"
                   >
                     <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-control border transition-colors duration-200 ${
-                        isChecked ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md border-2 transition-colors duration-200 ${
+                        isChecked ? "border-border bg-accent text-foreground" : "border-border bg-card"
                       }`}
                     >
                       <AnimatePresence>
@@ -350,7 +350,7 @@ export default function OrderForm(props: Props) {
                     key={s.id}
                     type="button"
                     onClick={() => addSuggestion(s.name)}
-                    className="rounded-control border border-border bg-card px-3 py-1.5 text-xs text-foreground active:border-primary/40 active:bg-primary-soft active:text-primary"
+                    className="rounded-full border-2 border-border bg-card px-3 py-1.5 text-xs font-bold text-foreground active:bg-accent-soft"
                   >
                     + {s.name}
                   </button>
@@ -415,7 +415,7 @@ export default function OrderForm(props: Props) {
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t border-border bg-background/95 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md border-t-2 border-border bg-card px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
         <button type="submit" disabled={isPending} className="btn-primary w-full">
           {isPending ? "Mengirim..." : totalItems > 0 ? `Kirim Pesanan (${totalItems} item)` : "Kirim Pesanan"}
         </button>

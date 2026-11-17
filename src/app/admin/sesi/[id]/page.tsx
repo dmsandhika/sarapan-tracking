@@ -19,7 +19,7 @@ export default async function SessionDetailPage({
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 pt-6 pb-4 backdrop-blur">
+      <header className="sticky top-0 z-10 flex items-center justify-between app-header">
         <div className="min-w-0">
           <h1 className="truncate text-lg font-semibold">{session.title}</h1>
           <p className="text-sm text-muted">{session.mode === "MENU" ? "Menu tetap" : "Bebas"}</p>

@@ -75,14 +75,14 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsSummary })
 
       <motion.section variants={item} className="flex flex-col gap-2">
         <h2 className="section-title">Menu favorit</h2>
-        <div className="rounded-card border border-border px-3.5">
+        <div className="rounded-card border-2 border-border px-3.5">
           {data.topItems.length === 0 ? (
             <p className="py-3 text-sm text-muted">Belum ada data pesanan.</p>
           ) : (
             data.topItems.map((menuItem, index) => (
               <div
                 key={menuItem.name}
-                className="flex items-center gap-2.5 border-b border-border py-2.5 last:border-b-0"
+                className="flex items-center gap-2.5 border-b border-line py-2.5 last:border-b-0"
               >
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[11px] font-semibold text-primary">
                   {index + 1}
@@ -97,16 +97,16 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsSummary })
 
       <motion.section variants={item} className="flex flex-col gap-2">
         <h2 className="section-title">Paling sering pesan</h2>
-        <div className="rounded-card border border-border px-3.5">
+        <div className="rounded-card border-2 border-border px-3.5">
           {data.topCustomers.length === 0 ? (
             <p className="py-3 text-sm text-muted">Belum ada data pesanan.</p>
           ) : (
             data.topCustomers.map((customer, index) => (
               <div
                 key={`${customer.name}-${index}`}
-                className="flex items-center gap-2.5 border-b border-border py-2.5 last:border-b-0"
+                className="flex items-center gap-2.5 border-b border-line py-2.5 last:border-b-0"
               >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-muted">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card text-[11px] font-semibold text-muted">
                   {customer.name.charAt(0).toUpperCase()}
                 </span>
                 <span className="flex-1 truncate text-sm">{customer.name}</span>

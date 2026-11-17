@@ -14,11 +14,11 @@ export default function QtyStepper({ qty, onChange }: { qty: number; onChange: (
       <button
         type="button"
         onClick={() => onChange(qty - 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
+        className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-border bg-accent text-lg font-bold leading-none active:translate-y-px"
       >
         −
       </button>
-      <span className="relative w-6 overflow-hidden text-center text-sm font-medium tabular-nums">
+      <span className="relative w-6 overflow-hidden text-center text-base font-bold tabular-nums">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span
             key={qty}
@@ -35,7 +35,7 @@ export default function QtyStepper({ qty, onChange }: { qty: number; onChange: (
       <button
         type="button"
         onClick={() => onChange(qty + 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-control border border-border text-lg leading-none"
+        className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-border bg-accent text-lg font-bold leading-none active:translate-y-px"
       >
         +
       </button>
