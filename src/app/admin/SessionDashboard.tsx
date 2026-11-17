@@ -68,7 +68,7 @@ export default function SessionDashboard({ session }: { session: SessionWithRela
       ) : (
         <SuggestionMenuList menuItems={session.menuItems} />
       )}
-      <AddMenuItemsForm sessionId={session.id} />
+      <AddMenuItemsForm sessionId={session.id} hasWarung={!!session.warungId} />
 
       <BillUploadForm sessionId={session.id} />
 

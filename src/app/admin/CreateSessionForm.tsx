@@ -4,8 +4,36 @@ import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createSession } from "@/app/actions/sessions";
 import { PlusIcon } from "@/components/icons";
+import type { WarungForSessionForm } from "@/app/actions/warung";
+import { formatRupiah } from "@/lib/currency";
 
-export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVendorWaNumber: string }) {
+export default function CreateSessionForm({
+  defaultVendorWaNumber,
+  warungs,
+}: {
+  defaultVendorWaNumber: string;
+  warungs: WarungForSessionForm[];
+}) {
+  const [warungId, setWarungId] = useState("");
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const warung = warungs.find((w) => w.id === warungId) ?? null;
+
+  function pickWarung(id: string) {
+    setWarungId(id);
+    const w = warungs.find((x) => x.id === id);
+    setChecked(new Set(w ? w.items.filter((i) => i.defaultChecked).map((i) => i.id) : []));
+    if (w?.waNumber) setVendorWaNumber(w.waNumber);
+  }
+
+  function toggleItem(id: string) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [mode, setMode] = useState<"MENU" | "FREETEXT">("MENU");
@@ -19,6 +47,10 @@ export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVe
       setError("Judul sesi wajib diisi.");
       return;
     }
+    if (mode === "MENU" && warung && checked.size === 0) {
+      setError("Pilih minimal 1 lauk yang ready.");
+      return;
+    }
     setError(null);
     startTransition(async () => {
       try {
@@ -26,6 +58,8 @@ export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVe
           title: title.trim(),
           mode,
           vendorWaNumber: vendorWaNumber.trim() || undefined,
+          warungId: mode === "MENU" && warung ? warung.id : undefined,
+          warungItemIds: mode === "MENU" && warung ? Array.from(checked) : undefined,
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Gagal membuat sesi.");
@@ -94,9 +128,55 @@ export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVe
               Bebas (free-text)
             </button>
           </div>
+          {mode === "MENU" && warungs.length > 0 && (
+            <select value={warungId} onChange={(e) => pickWarung(e.target.value)} className="field-input" aria-label="Pilih warung">
+              <option value="">Tanpa warung (upload foto menu)</option>
+              {warungs.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {mode === "MENU" && warung && (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold">
+                  Lauk ready ({checked.size}/{warung.items.length})
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setChecked(new Set(warung.items.map((i) => i.id)))}
+                  className="min-h-11 px-2 text-sm font-bold text-primary"
+                >
+                  Semua ready
+                </button>
+              </div>
+              {warung.items.length === 0 ? (
+                <p className="text-sm text-muted">Warung ini belum punya lauk. Isi dulu di menu Warung.</p>
+              ) : (
+                <div className="flex flex-col">
+                  {warung.items.map((item) => {
+                    const on = checked.has(item.id);
+                    return (
+                      <label key={item.id} className="flex min-h-11 cursor-pointer items-center gap-3 border-b border-line py-1 last:border-b-0">
+                        <input type="checkbox" checked={on} onChange={() => toggleItem(item.id)} className="h-5 w-5 accent-[var(--accent)]" />
+                        <span className={`flex-1 text-[15px] ${on ? "" : "text-muted line-through"}`}>{item.name}</span>
+                        {item.price != null && <span className="text-sm tabular-nums text-muted">{formatRupiah(item.price)}</span>}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           <p className="text-xs text-muted">
             {mode === "MENU"
-              ? "Cocok buat sarapan warung: upload foto menu dulu, orang pilih dari daftar."
+              ? warung
+                ? "Hanya lauk yang dicentang yang bisa dipesan. Sesi langsung dibuka."
+                : "Cocok buat sarapan warung: upload foto menu dulu, orang pilih dari daftar."
               : "Cocok buat ShopeeFood/GoFood/kopi: orang tulis sendiri pesanannya."}
           </p>
 

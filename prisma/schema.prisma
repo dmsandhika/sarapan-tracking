@@ -22,6 +22,8 @@ model Session {
   status         String   @default("DRAFT")
   imageUrl       String?
   vendorWaNumber String?
+  warungId       String?
+  warung         Warung?  @relation(fields: [warungId], references: [id], onDelete: SetNull)
   createdAt      DateTime @default(now())
 
   menuItems MenuItem[]
@@ -37,6 +39,7 @@ model MenuItem {
   name      String
   status    String  @default("AVAILABLE")
   sortOrder Int     @default(0)
+  price     Int? // snapshot harga dari WarungMenuItem, opsional
 
   orderItems        OrderItem[] @relation("CurrentItem")
   substitutedOrders OrderItem[] @relation("OriginalItem")
@@ -87,4 +90,28 @@ model OrderItem {
 model AppSetting {
   key   String @id
   value String
+}
+
+// Master data warung langganan beserta daftar lauknya. Saat sesi dibuat, lauk yang
+// dicentang disalin (snapshot) ke MenuItem sehingga riwayat tidak berubah kalau
+// lauk di warung diedit/dihapus.
+model Warung {
+  id        String   @id @default(cuid())
+  name      String
+  waNumber  String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  items    WarungMenuItem[]
+  sessions Session[]
+}
+
+model WarungMenuItem {
+  id        String  @id @default(cuid())
+  warungId  String
+  warung    Warung  @relation(fields: [warungId], references: [id], onDelete: Cascade)
+  name      String
+  price     Int?
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
 }

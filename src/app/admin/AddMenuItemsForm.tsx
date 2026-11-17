@@ -6,7 +6,8 @@ import type { ExtractedMenuItem } from "@/lib/gemini";
 import GeneratingIndicator from "./GeneratingIndicator";
 import { TrashIcon } from "@/components/icons";
 
-export default function AddMenuItemsForm({ sessionId }: { sessionId: string }) {
+export default function AddMenuItemsForm({ sessionId, hasWarung = false }: { sessionId: string; hasWarung?: boolean }) {
+  const [saveToWarung, setSaveToWarung] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<ExtractedMenuItem[] | null>(null);
@@ -60,7 +61,7 @@ export default function AddMenuItemsForm({ sessionId }: { sessionId: string }) {
       return;
     }
     startSaving(async () => {
-      await addMenuItems(sessionId, cleaned);
+      await addMenuItems(sessionId, cleaned, { saveToWarung: hasWarung && saveToWarung });
       setIsOpen(false);
       reset();
     });
@@ -132,6 +133,12 @@ export default function AddMenuItemsForm({ sessionId }: { sessionId: string }) {
           <button type="button" onClick={addDraftItem} className="btn-ghost self-start px-0 text-sm">
             + Tambah item manual
           </button>
+          {hasWarung && (
+            <label className="flex min-h-11 items-center gap-3 text-sm">
+              <input type="checkbox" checked={saveToWarung} onChange={(e) => setSaveToWarung(e.target.checked)} className="h-5 w-5 accent-[var(--accent)]" />
+              Simpan juga ke daftar lauk warung
+            </label>
+          )}
           <button type="button" onClick={handleSave} disabled={isSaving} className="btn-primary w-full">
             {isSaving ? "Menyimpan..." : "Simpan ke menu hari ini"}
           </button>

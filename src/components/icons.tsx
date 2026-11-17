@@ -132,3 +132,14 @@ export function WalletIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function StoreIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="20" height="20" className={className}>
+      <path d="M4 9 5.5 4h13L20 9" />
+      <path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9" />
+      <path d="M5 12v8h14v-8" />
+      <path d="M10 20v-4h4v4" />
+    </svg>
+  );
+}
