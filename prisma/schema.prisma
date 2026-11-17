@@ -82,3 +82,9 @@ model OrderItem {
   qty                Int       @default(1)
   note               String?
 }
+
+// Pengaturan global yang bisa diubah admin (key/value), mis. "maxUnpaidOrders".
+model AppSetting {
+  key   String @id
+  value String
+}

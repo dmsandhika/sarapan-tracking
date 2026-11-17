@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logoutAdmin } from "@/app/actions/admin";
 import { listSessionsForAdmin } from "@/app/actions/sessions";
-import { HistoryIcon, LogOutIcon } from "@/components/icons";
+import { HistoryIcon, LogOutIcon, WalletIcon } from "@/components/icons";
 import CreateSessionForm from "./CreateSessionForm";
 import SessionList from "./SessionList";
 
@@ -19,6 +19,13 @@ export default async function AdminPage() {
           <p className="text-sm text-muted">Semua sesi, hari ini &amp; aktif di atas</p>
         </div>
         <div className="flex items-center gap-1">
+          <Link
+            href="/admin/tunggakan"
+            aria-label="Tunggakan"
+            className="flex h-11 w-11 items-center justify-center text-muted"
+          >
+            <WalletIcon />
+          </Link>
           <Link
             href="/admin/riwayat"
             aria-label="Riwayat"

@@ -5,8 +5,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { normalizeWaNumber, isValidWaNumber } from "@/lib/phone";
 
-const MAX_UNPAID_ORDERS = 2;
-const UNPAID_ORDER_ERROR = "Kamu punya 2 pesanan yang belum lunas. Bayar dulu dan tunggu admin mengonfirmasi pembayaran sebelum pesan lagi. Cek pesananmu di halaman Status Pesanan.";
+import { getMaxUnpaidOrders } from "@/lib/settings";
+
+function unpaidOrderError(limit: number) {
+  return `Kamu punya ${limit} pesanan yang belum lunas. Bayar dulu dan tunggu admin mengonfirmasi pembayaran sebelum pesan lagi. Cek pesananmu di halaman Status Pesanan.`;
+}
 
 const submitOrderSchema = z.object({
   sessionId: z.string().min(1),
@@ -65,6 +68,8 @@ export async function submitOrder(
     }
   }
 
+  const maxUnpaid = await getMaxUnpaidOrders();
+
   try {
     const order = await prisma.$transaction(async (tx) => {
       const customer = await tx.customer.upsert({
@@ -79,7 +84,7 @@ export async function submitOrder(
       const unpaidCount = await tx.order.count({
         where: { customerId: customer.id, paid: false },
       });
-      if (unpaidCount >= MAX_UNPAID_ORDERS) {
+      if (maxUnpaid > 0 && unpaidCount >= maxUnpaid) {
         return null;
       }
 
@@ -105,7 +110,7 @@ export async function submitOrder(
       });
     });
 
-    if (!order) return { error: UNPAID_ORDER_ERROR, paymentRequired: true };
+    if (!order) return { error: unpaidOrderError(maxUnpaid), paymentRequired: true };
 
     revalidatePath("/admin");
     revalidatePath(`/admin/sesi/${sessionId}`);

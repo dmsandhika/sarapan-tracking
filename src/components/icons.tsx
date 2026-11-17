@@ -122,3 +122,13 @@ export function XIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function WalletIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width="20" height="20" className={className}>
+      <path d="M3 7a2 2 0 0 1 2-2h13v4" />
+      <path d="M3 7v10a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2Z" />
+      <path d="M16 14h2" />
+    </svg>
+  );
+}
