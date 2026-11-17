@@ -46,15 +46,21 @@ export async function listWarungsForSessionForm(): Promise<WarungForSessionForm[
     orderBy: { name: "asc" },
     include: { items: { orderBy: [{ sortOrder: "asc" }, { name: "asc" }] } },
   });
-  const result: WarungForSessionForm[] = [];
-  for (const w of warungs) {
-    const last = await prisma.session.findFirst({
-      where: { warungId: w.id, mode: "MENU" },
-      orderBy: { createdAt: "desc" },
-      include: { menuItems: { select: { name: true } } },
-    });
+  // Satu query untuk semua warung (bukan satu per warung) supaya hemat koneksi.
+  const sessions = await prisma.session.findMany({
+    where: { warungId: { in: warungs.map((w) => w.id) }, mode: "MENU" },
+    orderBy: { createdAt: "desc" },
+    select: { warungId: true, createdAt: true, menuItems: { select: { name: true } } },
+  });
+  const lastByWarung = new Map<string, (typeof sessions)[number]>();
+  for (const sess of sessions) {
+    if (sess.warungId && !lastByWarung.has(sess.warungId)) lastByWarung.set(sess.warungId, sess);
+  }
+
+  const result: WarungForSessionForm[] = warungs.map((w) => {
+    const last = lastByWarung.get(w.id);
     const lastNames = last && last.menuItems.length > 0 ? new Set(last.menuItems.map((m) => m.name.trim().toLowerCase())) : null;
-    result.push({
+    return {
       id: w.id,
       name: w.name,
       waNumber: w.waNumber,
@@ -65,8 +71,8 @@ export async function listWarungsForSessionForm(): Promise<WarungForSessionForm[
         defaultChecked:
           !last || !lastNames ? true : lastNames.has(i.name.trim().toLowerCase()) || i.createdAt > last.createdAt,
       })),
-    });
-  }
+    };
+  });
   return result;
 }
 
