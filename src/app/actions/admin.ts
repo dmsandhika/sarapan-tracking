@@ -87,7 +87,11 @@ export async function publishMenuSession(sessionId: string, items: ExtractedMenu
   revalidatePath("/pesan");
 }
 
-export async function addMenuItems(sessionId: string, items: ExtractedMenuItem[]) {
+export async function addMenuItems(
+  sessionId: string,
+  items: ExtractedMenuItem[],
+  options?: { saveToWarung?: boolean }
+) {
   // Works for both modes: in MENU sessions these are real orderable items; in
   // FREETEXT sessions they're just suggestion chips shown alongside the free
   // text field (never linked to an OrderItem.menuItemId there).
@@ -108,6 +112,21 @@ export async function addMenuItems(sessionId: string, items: ExtractedMenuItem[]
       sortOrder: startOrder + index,
     })),
   });
+
+  if (options?.saveToWarung && session.warungId) {
+    const saved = await prisma.warungMenuItem.findMany({ where: { warungId: session.warungId } });
+    const savedNames = new Set(saved.map((m) => m.name.trim().toLowerCase()));
+    const toSave = newItems.filter((item) => !savedNames.has(item.name.trim().toLowerCase()));
+    if (toSave.length > 0) {
+      await prisma.warungMenuItem.createMany({
+        data: toSave.map((item, index) => ({
+          warungId: session.warungId!,
+          name: item.name,
+          sortOrder: saved.length + index,
+        })),
+      });
+    }
+  }
 
   revalidatePath("/admin");
   revalidatePath(`/admin/sesi/${sessionId}`);

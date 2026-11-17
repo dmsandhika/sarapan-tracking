@@ -22,6 +22,8 @@ model Session {
   status         String   @default("DRAFT")
   imageUrl       String?
   vendorWaNumber String?
+  warungId       String?
+  warung         Warung?  @relation(fields: [warungId], references: [id], onDelete: SetNull)
   createdAt      DateTime @default(now())
 
   menuItems MenuItem[]
@@ -81,4 +83,33 @@ model OrderItem {
   customText         String?
   qty                Int       @default(1)
   note               String?
+}
+
+// Pengaturan global yang bisa diubah admin (key/value), mis. "maxUnpaidOrders".
+model AppSetting {
+  key   String @id
+  value String
+}
+
+// Master data warung langganan beserta daftar lauknya. Saat sesi dibuat, lauk yang
+// dicentang disalin (snapshot) ke MenuItem sehingga riwayat tidak berubah kalau
+// lauk di warung diedit/dihapus.
+model Warung {
+  id        String   @id @default(cuid())
+  name      String
+  waNumber  String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  items    WarungMenuItem[]
+  sessions Session[]
+}
+
+model WarungMenuItem {
+  id        String  @id @default(cuid())
+  warungId  String
+  warung    Warung  @relation(fields: [warungId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
 }

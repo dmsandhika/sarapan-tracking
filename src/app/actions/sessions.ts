@@ -21,15 +21,29 @@ export async function createSession(input: {
   title: string;
   mode: "MENU" | "FREETEXT";
   vendorWaNumber?: string;
+  warungId?: string;
+  warungItemIds?: string[];
 }) {
   const title = input.title.trim();
   if (title.length === 0) {
     throw new Error("Judul sesi wajib diisi.");
   }
 
-  const vendorWaNumber = input.vendorWaNumber?.trim()
-    ? normalizeWaNumber(input.vendorWaNumber)
-    : null;
+  let warung: Awaited<ReturnType<typeof prisma.warung.findUnique>> = null;
+  let warungItems: { name: string }[] = [];
+  if (input.warungId && input.mode === "MENU") {
+    warung = await prisma.warung.findUnique({ where: { id: input.warungId } });
+    if (!warung) throw new Error("Warung tidak ditemukan.");
+    const found = await prisma.warungMenuItem.findMany({
+      where: { warungId: warung.id, id: { in: input.warungItemIds ?? [] } },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    });
+    if (found.length === 0) throw new Error("Pilih minimal 1 lauk yang ready.");
+    warungItems = found.map((i) => ({ name: i.name }));
+  }
+
+  const vendorInput = input.vendorWaNumber?.trim() || warung?.waNumber || "";
+  const vendorWaNumber = vendorInput ? normalizeWaNumber(vendorInput) : null;
   if (vendorWaNumber && !isValidWaNumber(vendorWaNumber)) {
     throw new Error("Nomor WA vendor tidak valid.");
   }
@@ -42,8 +56,13 @@ export async function createSession(input: {
       title,
       date: todayJakarta(),
       mode: input.mode,
-      status: input.mode === "FREETEXT" ? "PUBLISHED" : "DRAFT",
+      // Menu dari warung sudah lengkap, langsung dibuka. Menu tetap tanpa warung: tunggu upload foto.
+      status: input.mode === "FREETEXT" || warung ? "PUBLISHED" : "DRAFT",
       vendorWaNumber,
+      warungId: warung?.id ?? null,
+      menuItems: {
+        create: warungItems.map((item, index) => ({ name: item.name, sortOrder: index })),
+      },
     },
   });
 
