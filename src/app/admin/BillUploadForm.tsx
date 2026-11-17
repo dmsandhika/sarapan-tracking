@@ -41,7 +41,7 @@ export default function BillUploadForm({ sessionId }: { sessionId: string }) {
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
-        className="flex min-h-11 items-center self-start rounded-card border border-dashed border-border px-4 text-sm text-muted"
+        className="flex min-h-11 items-center self-start rounded-card border-2 border-dashed border-border px-4 text-sm text-muted"
       >
         {isPending ? "Memproses..." : "Pilih foto bill"}
       </button>

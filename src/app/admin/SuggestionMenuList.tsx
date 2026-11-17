@@ -48,11 +48,11 @@ export default function SuggestionMenuList({ menuItems }: { menuItems: MenuItemR
         Ditampilin sebagai shortcut di form pesan — customer tetep bisa ketik bebas.
       </p>
       {error && <p className="text-sm text-danger">{error}</p>}
-      <div className="rounded-card border border-border px-3">
+      <div className="rounded-card border-2 border-border px-3">
         {menuItems.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between gap-2 border-b border-border px-1 py-3 last:border-b-0"
+            className="flex items-center justify-between gap-2 border-b border-line px-1 py-3 last:border-b-0"
           >
             {renamingId === item.id ? (
               <input

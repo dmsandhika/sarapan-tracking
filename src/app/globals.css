@@ -1,20 +1,25 @@
 @import "tailwindcss";
 
+/* Design System v3 — "Jajan Pop": biru cerah, outline tebal, bayangan keras, tombol kuning. */
 :root {
-  --background: #faf6f1;
-  --foreground: #2a211b;
+  --background: #f2f8ff;
+  --foreground: #101b2d; /* ink */
   --card: #ffffff;
-  --border: #ece2d8;
-  --muted: #8a7c6d;
-  --primary: #a83a22;
-  --primary-foreground: #fdf5ef;
-  --primary-soft: #f6ddd2;
-  --success: #1f7a4d;
-  --success-soft: #e6f4ec;
-  --danger: #9c2b3f;
-  --danger-soft: #f8e4e7;
-  --warning: #a6690a;
-  --warning-soft: #f8ecd6;
+  --border: #101b2d; /* outline tebal berwarna ink */
+  --line: #dbe7f3; /* pembatas tipis antar-baris */
+  --muted: #5d6c82;
+  --sky: #1d9bf0; /* biru header */
+  --primary: #0a7bd6; /* biru aksen untuk teks/ikon */
+  --primary-foreground: #ffffff;
+  --primary-soft: #d9edfd;
+  --accent: #ffc82c; /* kuning tombol utama */
+  --accent-soft: #fff1bf;
+  --success: #0c8f50;
+  --success-soft: #d4f6e3;
+  --danger: #d92d45;
+  --danger-soft: #fde3e7;
+  --warning: #a86500;
+  --warning-soft: #ffeab8;
   color-scheme: light;
 }
 
@@ -23,10 +28,14 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-border: var(--border);
+  --color-line: var(--line);
   --color-muted: var(--muted);
+  --color-sky: var(--sky);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger: var(--danger);
@@ -34,8 +43,9 @@
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --font-sans: var(--font-sans);
-  --radius-control: 10px;
-  --radius-card: 14px;
+  --font-display: var(--font-display);
+  --radius-control: 12px;
+  --radius-card: 20px;
 }
 
 html {
@@ -43,34 +53,77 @@ html {
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image: radial-gradient(rgba(29, 155, 240, 0.16) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
   color: var(--foreground);
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
 @utility btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-card px-4 text-[15px] font-medium transition active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-bold transition active:translate-y-[3px] disabled:pointer-events-none disabled:opacity-50;
 }
 
 @layer components {
   .btn-primary {
-    @apply btn bg-primary text-primary-foreground;
+    @apply btn border-2 border-border bg-accent text-foreground;
+    box-shadow: 0 3px 0 0 var(--border);
+  }
+  .btn-primary:active {
+    box-shadow: 0 0 0 0 var(--border);
   }
   .btn-secondary {
-    @apply btn border border-border bg-card text-foreground;
+    @apply btn border-2 border-border bg-card text-foreground;
+    box-shadow: 0 3px 0 0 var(--border);
+  }
+  .btn-secondary:active {
+    box-shadow: 0 0 0 0 var(--border);
   }
   .btn-ghost {
-    @apply btn min-h-9 px-2 text-muted underline underline-offset-4;
+    @apply btn min-h-9 px-2 font-semibold text-primary underline underline-offset-4;
   }
   .field-input {
-    @apply min-h-11 w-full rounded-card border border-border bg-card px-3.5 text-[15px] text-foreground placeholder:text-muted/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none;
+    @apply min-h-11 w-full rounded-control border-2 border-border bg-card px-3.5 text-[15px] font-medium text-foreground placeholder:font-normal placeholder:text-muted/70 focus:border-border focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none;
+  }
+  .field-input:focus {
+    box-shadow: 0 3px 0 0 var(--sky);
   }
   .card {
-    @apply rounded-card border border-border bg-card p-4;
+    @apply rounded-card border-2 border-border bg-card p-4;
+    box-shadow: 0 4px 0 0 var(--border);
   }
   .section-title {
-    @apply text-xs font-semibold tracking-wide text-muted uppercase;
+    @apply font-display text-base font-bold text-foreground;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full border-2 border-border px-2.5 py-0.5 text-xs font-bold;
   }
   .list-row {
-    @apply flex items-center justify-between gap-3 border-b border-border px-1 py-3 last:border-b-0;
+    @apply flex items-center justify-between gap-3 border-b border-line px-1 py-3 last:border-b-0;
   }
+  /* Header biru bertitik, tulisan putih, garis bawah tebal. */
+  .app-header {
+    background-color: var(--sky);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px);
+    background-size: 16px 16px;
+    border-bottom: 2px solid var(--border);
+    padding: 1.5rem 1.25rem 1rem;
+    color: #fff;
+  }
+  .app-header h1 {
+    @apply font-display text-xl font-extrabold text-white;
+    text-shadow: 0 2px 0 rgba(16, 27, 45, 0.35);
+  }
+}
+
+/* Di luar layer supaya menang atas utility .text-muted / .btn-ghost. */
+.app-header p,
+.app-header .text-muted,
+.app-header .btn-ghost {
+  color: rgba(255, 255, 255, 0.92);
 }

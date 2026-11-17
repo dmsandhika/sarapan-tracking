@@ -75,7 +75,7 @@ export default function UploadMenuForm({ sessionId }: { sessionId: string }) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-full rounded-card border border-dashed border-border px-4 py-6 text-sm text-muted"
+          className="w-full rounded-card border-2 border-dashed border-border px-4 py-6 text-sm text-muted"
         >
           {previews.length > 0 ? "Ganti gambar" : "Pilih gambar menu"}
         </button>
@@ -93,7 +93,7 @@ export default function UploadMenuForm({ sessionId }: { sessionId: string }) {
         <div className="flex flex-wrap gap-2">
           {previews.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="Preview menu" className="h-28 rounded-card border border-border object-contain" />
+            <img key={i} src={src} alt="Preview menu" className="h-28 rounded-card border-2 border-border object-contain" />
           ))}
         </div>
       )}

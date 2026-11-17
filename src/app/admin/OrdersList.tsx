@@ -389,7 +389,7 @@ export default function OrdersList({
               )}
             </AnimatePresence>
 
-            <div className="flex flex-col gap-2 border-t border-border pt-2 pl-1">
+            <div className="flex flex-col gap-2 border-t border-line pt-2 pl-1">
               {order.items.map((item) => (
                 <OrderItemRow
                   key={item.id}

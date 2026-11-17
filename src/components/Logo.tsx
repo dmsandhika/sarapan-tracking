@@ -8,29 +8,17 @@ export function Logo({ size = 32, className }: { size?: number; className?: stri
       role="img"
       aria-label="Jompesan"
     >
-      <rect width="32" height="32" rx="8" fill="var(--primary)" />
-      <rect x="8" y="13" width="14" height="10" rx="3" fill="var(--background)" />
+      <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="var(--accent)" stroke="var(--border)" strokeWidth="2.5" />
+      <rect x="8" y="14" width="13" height="9" rx="3" fill="#fff" stroke="var(--border)" strokeWidth="2" />
       <path
-        d="M22 15.5 a3.2 3.2 0 0 1 0 6.4"
+        d="M21 16.5 a3 3 0 0 1 0 5"
         fill="none"
-        stroke="var(--background)"
-        strokeWidth="2.4"
+        stroke="var(--border)"
+        strokeWidth="2"
         strokeLinecap="round"
       />
-      <path
-        d="M12 11 c-1 -1.6 1 -2.4 0 -4"
-        fill="none"
-        stroke="var(--background)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18 11 c-1 -1.6 1 -2.4 0 -4"
-        fill="none"
-        stroke="var(--background)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+      <path d="M12 11.5 c-1 -1.5 1 -2.3 0 -4" fill="none" stroke="var(--border)" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M17 11.5 c-1 -1.5 1 -2.3 0 -4" fill="none" stroke="var(--border)" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }

@@ -93,7 +93,7 @@ export default function AddMenuItemsForm({ sessionId }: { sessionId: string }) {
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="w-full rounded-card border border-dashed border-border px-4 py-4 text-sm text-muted"
+        className="w-full rounded-card border-2 border-dashed border-border px-4 py-4 text-sm text-muted"
       >
         Pilih gambar menu susulan
       </button>

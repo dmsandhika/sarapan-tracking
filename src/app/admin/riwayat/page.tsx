@@ -12,7 +12,7 @@ export default async function RiwayatPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 pt-6 pb-4 backdrop-blur">
+      <header className="sticky top-0 z-10 flex items-center justify-between app-header">
         <div>
           <h1 className="text-lg font-semibold">Riwayat Pesanan</h1>
           <p className="text-sm text-muted">Sesi-sesi sebelumnya</p>

@@ -17,12 +17,12 @@ export default function DaySummary({ orders }: { orders: OrderWithItems[] }) {
         <span className="text-muted">Sudah terkumpul</span>
         <span className="font-medium tabular-nums text-success">{formatRupiah(totalCollected)}</span>
       </div>
-      <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-semibold">
+      <div className="flex items-center justify-between border-t border-line pt-2 text-sm font-semibold">
         <span>Belum terkumpul</span>
         <span className="tabular-nums text-danger">{formatRupiah(totalBilled - totalCollected)}</span>
       </div>
       {unpaidOrders.length > 0 && (
-        <div className="flex flex-col gap-2 border-t border-border pt-3">
+        <div className="flex flex-col gap-2 border-t border-line pt-3">
           <p className="text-xs text-muted">Belum bayar:</p>
           <ul className="flex flex-col gap-2">
             {unpaidOrders.map((o) => (

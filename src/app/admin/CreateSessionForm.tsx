@@ -78,8 +78,8 @@ export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVe
             <button
               type="button"
               onClick={() => setMode("MENU")}
-              className={`flex-1 rounded-control border px-3 py-2 text-sm font-medium ${
-                mode === "MENU" ? "border-primary bg-primary-soft text-primary" : "border-border text-muted"
+              className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-bold ${
+                mode === "MENU" ? "border-border bg-accent text-foreground" : "border-line bg-card text-muted"
               }`}
             >
               Menu tetap
@@ -87,8 +87,8 @@ export default function CreateSessionForm({ defaultVendorWaNumber }: { defaultVe
             <button
               type="button"
               onClick={() => setMode("FREETEXT")}
-              className={`flex-1 rounded-control border px-3 py-2 text-sm font-medium ${
-                mode === "FREETEXT" ? "border-primary bg-primary-soft text-primary" : "border-border text-muted"
+              className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-bold ${
+                mode === "FREETEXT" ? "border-border bg-accent text-foreground" : "border-line bg-card text-muted"
               }`}
             >
               Bebas (free-text)

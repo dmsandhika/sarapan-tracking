@@ -55,9 +55,9 @@ function CustomerCard({ customer }: { customer: CustomerWithOrders }) {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-border pt-3">
+      <div className="flex flex-col gap-3 border-t border-line pt-3">
         {customer.orders.map((order) => (
-          <div key={order.id} className="flex flex-col gap-2 rounded-card border border-border p-2">
+          <div key={order.id} className="flex flex-col gap-2 rounded-card border-2 border-border p-2">
             <Link
               href={`/admin/riwayat/${order.sessionId}`}
               className="inline-flex items-center gap-1 text-sm text-muted"
@@ -87,7 +87,7 @@ function CustomerCard({ customer }: { customer: CustomerWithOrders }) {
       </div>
 
       {totalBilled > 0 && (
-        <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-medium">
+        <div className="flex items-center justify-between border-t border-line pt-2 text-sm font-medium">
           <span>Total semua pesanan</span>
           <span className="tabular-nums">{formatRupiah(totalBilled)}</span>
         </div>

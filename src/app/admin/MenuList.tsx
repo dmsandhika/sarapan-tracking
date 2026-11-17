@@ -106,7 +106,7 @@ export default function MenuList({
     <section className="flex flex-col gap-3">
       <h2 className="section-title">Menu hari ini</h2>
       {error && <p className="text-sm text-danger">{error}</p>}
-      <div className="rounded-card border border-border px-3">
+      <div className="rounded-card border-2 border-border px-3">
         {menuItems.map((item) => {
           const isHabis = item.status === "HABIS";
           const affected = affectedCounts[item.id] ?? 0;
@@ -117,7 +117,7 @@ export default function MenuList({
           return (
             <div
               key={item.id}
-              className="flex flex-col gap-2 border-b border-border px-1 py-3 last:border-b-0"
+              className="flex flex-col gap-2 border-b border-line px-1 py-3 last:border-b-0"
             >
               <div className="flex items-center justify-between gap-2">
                 {renamingId === item.id ? (
